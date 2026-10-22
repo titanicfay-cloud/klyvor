@@ -66,7 +66,6 @@ export default function TasksPage() {
 
     if (error) {
       toast.error("LOAD ERROR: " + error.message);
-      console.error("Supabase Load Error:", error);
     } else {
       setTasks(data || []);
     }
@@ -183,7 +182,6 @@ export default function TasksPage() {
     return "bg-[#0B1020] text-[#C7D0E0] border-[#27344B]";
   };
 
-  // Helper to render the correct label in the Select trigger
   const getStatusLabel = (val: string) => {
     if (val === "all") return "All Statuses";
     if (val === "todo") return "To Do";
@@ -217,7 +215,6 @@ export default function TasksPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          // FIXED: Changed label text color from #64748B to #C7D0E0 for better contrast
           { label: "All Tasks", value: tasks.length, icon: Circle, color: "text-white" },
           { label: "To Do", value: tasks.filter(t => t.status === "todo").length, icon: Circle, color: "text-[#C7D0E0]" },
           { label: "In Progress", value: tasks.filter(t => t.status === "in_progress").length, icon: Clock, color: "text-primary" },
@@ -244,9 +241,9 @@ export default function TasksPage() {
           />
         </div>
         <div className="flex gap-3">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          
+          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as string)}>
             <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
-              {/* FIXED: Force the trigger to show the correct label */}
               <SelectValue placeholder="Status">
                 {getStatusLabel(statusFilter)}
               </SelectValue>
@@ -259,9 +256,8 @@ export default function TasksPage() {
             </SelectContent>
           </Select>
 
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+          <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as string)}>
             <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
-              {/* FIXED: Force the trigger to show the correct label */}
               <SelectValue placeholder="Priority">
                 {getPriorityLabel(priorityFilter)}
               </SelectValue>
@@ -332,10 +328,8 @@ export default function TasksPage() {
               </div>
 
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-[#C7D0E0] hover:text-white shrink-0">
-                    <MoreHorizontal size={18} />
-                  </Button>
+                <DropdownMenuTrigger className="text-[#C7D0E0] hover:text-white outline-none h-8 w-8 flex items-center justify-center shrink-0">
+                  <MoreHorizontal size={18} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#111A2E] border-[#27344B] text-white">
                   <DropdownMenuItem onClick={() => handleOpenEdit(task)} className="cursor-pointer hover:bg-[#0B1020]">
@@ -387,7 +381,7 @@ export default function TasksPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select value={status} onValueChange={(val: TaskStatus) => setStatus(val)}>
+                <Select value={status} onValueChange={(val) => setStatus(val as TaskStatus)}>
                   <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
                     <SelectValue />
                   </SelectTrigger>
@@ -401,7 +395,7 @@ export default function TasksPage() {
 
               <div className="space-y-2">
                 <Label>Priority</Label>
-                <Select value={priority} onValueChange={(val: TaskPriority) => setPriority(val)}>
+                <Select value={priority} onValueChange={(val) => setPriority(val as TaskPriority)}>
                   <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
                     <SelectValue />
                   </SelectTrigger>

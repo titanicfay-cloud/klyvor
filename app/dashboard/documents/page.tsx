@@ -29,10 +29,8 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   
-  // Mobile view state
   const [isMobileEditorOpen, setIsMobileEditorOpen] = useState(false);
 
-  // Refs for autosave to prevent stale closures
   const activeDocRef = useRef<Document | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -65,7 +63,6 @@ export default function DocumentsPage() {
     fetchDocuments();
   }, []);
 
-  // Autosave Logic
   const triggerAutosave = (updatedDoc: Document) => {
     setSaveStatus("unsaved");
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -89,10 +86,9 @@ export default function DocumentsPage() {
         toast.error("Couldn't save your changes.");
       } else {
         setSaveStatus("saved");
-        // Update the list locally
         setDocuments(prev => prev.map(d => d.id === latestDoc.id ? latestDoc : d));
       }
-    }, 1000); // 1 second debounce
+    }, 1000);
   };
 
   const handleCreate = async () => {
@@ -168,7 +164,6 @@ export default function DocumentsPage() {
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col md:flex-row gap-6 animate-in fade-in duration-500">
       
-      {/* SIDEBAR: Document List (Hidden on mobile if editor is open) */}
       <div className={`w-full md:w-80 flex-col bg-[#111A2E] border border-[#27344B] rounded-xl overflow-hidden shrink-0 ${isMobileEditorOpen ? 'hidden md:flex' : 'flex'}`}>
         
         <div className="p-4 border-b border-[#27344B]">
@@ -205,11 +200,10 @@ export default function DocumentsPage() {
                     <h3 className={`text-sm font-semibold truncate pr-2 ${activeDoc?.id === doc.id ? 'text-primary' : 'text-white'}`}>
                       {doc.title || "Untitled Document"}
                     </h3>
+                    
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="text-[#64748B] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal size={16} />
-                        </button>
+                      <DropdownMenuTrigger className="text-[#64748B] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity outline-none">
+                        <MoreHorizontal size={16} />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-[#111A2E] border-[#27344B] text-white">
                         <DropdownMenuItem onClick={(e) => handleDuplicate(doc, e)} className="cursor-pointer hover:bg-[#0B1020]">
@@ -220,6 +214,7 @@ export default function DocumentsPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+
                   </div>
                   <p className="text-xs text-[#64748B] truncate mb-2">
                     {doc.content || "Empty document..."}
@@ -234,14 +229,12 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      {/* MAIN: Editor (Hidden on mobile if editor is closed) */}
       <div className={`flex-1 flex-col bg-[#0B1020] border border-[#27344B] rounded-xl overflow-hidden relative ${!isMobileEditorOpen ? 'hidden md:flex' : 'flex'}`}>
         {activeDoc ? (
           <>
-            {/* Editor Header */}
             <div className="h-14 border-b border-[#27344B] flex items-center justify-between px-4 sm:px-6 bg-[#111A2E]/50">
               <div className="flex items-center gap-3">
-                {/* Mobile Back Button */}
+                
                 <button 
                   onClick={() => setIsMobileEditorOpen(false)}
                   className="md:hidden text-[#C7D0E0] hover:text-white"
@@ -249,7 +242,6 @@ export default function DocumentsPage() {
                   <ArrowLeft size={20} />
                 </button>
                 
-                {/* Save Status */}
                 <div className="flex items-center gap-1.5 text-xs font-medium">
                   {saveStatus === "saved" && <><CheckCircle2 size={14} className="text-success" /><span className="text-[#64748B]">Saved</span></>}
                   {saveStatus === "saving" && <><Loader2 size={14} className="text-primary animate-spin" /><span className="text-primary">Saving...</span></>}
@@ -259,7 +251,6 @@ export default function DocumentsPage() {
               </div>
             </div>
 
-            {/* Editor Content */}
             <div className="flex-1 flex flex-col overflow-y-auto p-6 sm:p-12">
               <div className="max-w-3xl w-full mx-auto flex flex-col h-full">
                 <input

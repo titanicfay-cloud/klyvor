@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Briefcase, Settings } from "lucide-react";
 
-const navItems = [
+// FIXED: Explicitly typed the array so TypeScript knows 'soon' is optional
+type NavItem = { label: string; href: string; icon: any; soon?: boolean };
+type NavGroup = { title: string; items: NavItem[] };
+
+const navItems: NavGroup[] = [
   { title: "WORKSPACE", items: [
       { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
       { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid },
@@ -39,7 +43,6 @@ export default function Sidebar() {
                 const isActive = pathname === item.href;
                 return (
                   <li key={item.label}>
-                    {/* FIXED: Changed active background to Navy with Cyan border */}
                     <Link href={item.href} className={cn("flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", isActive ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
                       <div className="flex items-center gap-3">
                         <item.icon size={18} className={isActive ? "text-primary" : "text-[#64748B]"} />

@@ -6,7 +6,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, LogOut, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Sidebar from "./Sidebar";
 import { useEffect, useState } from "react";
 
@@ -44,8 +43,8 @@ export default function Header({ userEmail, userName }: { userEmail: string, use
       <div className="flex items-center gap-4">
         <div className="lg:hidden">
           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-[#111A2E]"><Menu size={20} /></Button>
+            <SheetTrigger className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:bg-[#111A2E]">
+              <Menu size={20} />
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]"><Sidebar /></SheetContent>
           </Sheet>
@@ -54,13 +53,11 @@ export default function Header({ userEmail, userName }: { userEmail: string, use
       </div>
       <div className="flex items-center gap-4">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 outline-none">
-              <span className="hidden sm:block text-sm text-[#C7D0E0]">{userEmail}</span>
-              <Avatar className="h-9 w-9 border border-[#27344B]">
-                <AvatarFallback className="bg-[#111A2E] text-primary text-xs font-bold">{initials}</AvatarFallback>
-              </Avatar>
-            </button>
+          <DropdownMenuTrigger className="flex items-center gap-3 outline-none">
+            <span className="hidden sm:block text-sm text-[#C7D0E0]">{userEmail}</span>
+            <Avatar className="h-9 w-9 border border-[#27344B]">
+              <AvatarFallback className="bg-[#111A2E] text-primary text-xs font-bold">{initials}</AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-[#111A2E] border-[#27344B] text-white">
             <DropdownMenuLabel className="font-normal">
@@ -70,12 +67,12 @@ export default function Header({ userEmail, userName }: { userEmail: string, use
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-[#27344B]" />
-            <DropdownMenuItem asChild className="hover:bg-[#0B1020] cursor-pointer">
-              <Link href="/dashboard/settings" className="flex items-center gap-2 w-full"><Settings size={16} /> Settings</Link>
+            <DropdownMenuItem onClick={() => router.push("/dashboard/settings")} className="hover:bg-[#0B1020] cursor-pointer">
+              <Settings size={16} className="mr-2" /> Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-[#27344B]" />
-            <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10 cursor-pointer flex items-center gap-2">
-              <LogOut size={16} /> Sign Out
+            <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10 cursor-pointer">
+              <LogOut size={16} className="mr-2" /> Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

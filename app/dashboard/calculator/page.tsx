@@ -185,7 +185,7 @@ export default function CalculatorPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Currency</Label>
-                <Select value={currency} onValueChange={setCurrency}>
+                <Select value={currency} onValueChange={(val) => setCurrency(val as string)}>
                   <SelectTrigger className="w-[180px] bg-[#0B1020] border-[#27344B] text-white">
                     <SelectValue />
                   </SelectTrigger>
@@ -246,7 +246,7 @@ export default function CalculatorPage() {
 
               <div className="space-y-2">
                 <Label>Contingency buffer</Label>
-                <Select value={contingency} onValueChange={setContingency}>
+                <Select value={contingency} onValueChange={(val) => setContingency(val as string)}>
                   <SelectTrigger className="w-[180px] bg-[#0B1020] border-[#27344B] text-white">
                     <SelectValue />
                   </SelectTrigger>
