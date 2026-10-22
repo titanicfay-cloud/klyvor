@@ -39,7 +39,8 @@ export default function Sidebar() {
                 const isActive = pathname === item.href;
                 return (
                   <li key={item.label}>
-                    <Link href={item.href} className={cn("flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors", isActive ? "bg-primary/10 text-primary" : "text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
+                    {/* FIXED: Changed active background to Navy with Cyan border */}
+                    <Link href={item.href} className={cn("flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", isActive ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
                       <div className="flex items-center gap-3">
                         <item.icon size={18} className={isActive ? "text-primary" : "text-[#64748B]"} />
                         {item.label}
@@ -54,7 +55,7 @@ export default function Sidebar() {
         ))}
       </div>
       <div className="p-4 border-t border-[#27344B]">
-        <Link href="/dashboard/settings" className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors", pathname === "/dashboard/settings" ? "bg-primary/10 text-primary" : "text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
+        <Link href="/dashboard/settings" className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", pathname === "/dashboard/settings" ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
           <Settings size={18} className={pathname === "/dashboard/settings" ? "text-primary" : "text-[#64748B]"} />
           Settings
         </Link>

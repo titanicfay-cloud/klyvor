@@ -20,17 +20,16 @@ export default async function DashboardOverview() {
   return (
     <div className="max-w-6xl mx-auto space-y-10 pb-20 animate-in fade-in duration-500">
       
-      {/* 1. Welcome Section */}
       <div>
         <span className="text-primary font-bold text-xs tracking-[0.2em] uppercase mb-2 block">Your Workspace</span>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Welcome back, {firstName}.</h1>
         <p className="text-[#C7D0E0]">Your workspace is ready. What would you like to work on today?</p>
       </div>
 
-      {/* 2. Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/dashboard/tasks" className="flex items-center gap-4 bg-[#111A2E] border border-[#27344B] p-4 rounded-xl hover:border-primary/50 transition-colors group">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-[#0B1020] transition-colors shrink-0">
+          {/* FIXED: Dark background, Cyan icon. On hover, solid Cyan background, Dark icon */}
+          <div className="w-10 h-10 rounded-full bg-[#0B1020] border border-[#27344B] flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-[#0B1020] transition-colors shrink-0">
             <Plus size={20} />
           </div>
           <div>
@@ -40,7 +39,7 @@ export default async function DashboardOverview() {
         </Link>
         
         <Link href="/dashboard/documents" className="flex items-center gap-4 bg-[#111A2E] border border-[#27344B] p-4 rounded-xl hover:border-secondary/50 transition-colors group">
-          <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-colors shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[#0B1020] border border-[#27344B] flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-colors shrink-0">
             <FileText size={20} />
           </div>
           <div>
@@ -50,7 +49,7 @@ export default async function DashboardOverview() {
         </Link>
 
         <Link href="/dashboard/calculator" className="flex items-center gap-4 bg-[#111A2E] border border-[#27344B] p-4 rounded-xl hover:border-success/50 transition-colors group">
-          <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success group-hover:bg-success group-hover:text-white transition-colors shrink-0">
+          <div className="w-10 h-10 rounded-full bg-[#0B1020] border border-[#27344B] flex items-center justify-center text-success group-hover:bg-success group-hover:text-white transition-colors shrink-0">
             <Calculator size={20} />
           </div>
           <div>
@@ -60,7 +59,6 @@ export default async function DashboardOverview() {
         </Link>
       </div>
 
-      {/* 3. Pinned Tools */}
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold text-white">Your Tools</h2>
@@ -69,7 +67,7 @@ export default async function DashboardOverview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {tools.map((tool) => (
             <Link key={tool.name} href={tool.href} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-colors flex flex-col h-full group">
-              <div className="w-10 h-10 rounded-lg bg-[#111A2E] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-lg bg-[#111A2E] border border-[#27344B] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <tool.icon className="text-primary" size={20} />
               </div>
               <h3 className="text-white font-semibold mb-2">{tool.name}</h3>
@@ -82,7 +80,6 @@ export default async function DashboardOverview() {
         </div>
       </div>
 
-      {/* 4. Recent Activity (Empty State) */}
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold text-white">Recent Activity</h2>
@@ -98,7 +95,6 @@ export default async function DashboardOverview() {
         </div>
       </div>
 
-      {/* 5. Coming Soon Preview */}
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold text-white">More Possibilities Ahead</h2>
