@@ -28,11 +28,11 @@ export default function CalculatorPage() {
 
   // Inputs
   const [currency, setCurrency] = useState("USD");
-  const [income, setIncome] = useState("4000");
-  const [expenses, setExpenses] = useState("600");
-  const [hours, setHours] = useState("100");
+  const [income, setIncome] = useState("");
+  const [expenses, setExpenses] = useState("");
+  const [hours, setHours] = useState("");
   
-  const [projectHours, setProjectHours] = useState("25");
+  const [projectHours, setProjectHours] = useState("");
   const [rateType, setRateType] = useState<"calculated" | "custom">("calculated");
   const [customRate, setCustomRate] = useState("");
   const [contingency, setContingency] = useState("10");
@@ -200,19 +200,19 @@ export default function CalculatorPage() {
 
               <div className="space-y-2">
                 <Label>Target monthly income</Label>
-                <Input type="number" min="0" value={income} onChange={e => setIncome(e.target.value)} className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
+                <Input type="number" min="0" value={income} onChange={e => setIncome(e.target.value)} placeholder="e.g. 4000" className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
                 <p className="text-xs text-[#64748B]">The monthly income you want to earn before personal income taxes.</p>
               </div>
 
               <div className="space-y-2">
                 <Label>Monthly business expenses</Label>
-                <Input type="number" min="0" value={expenses} onChange={e => setExpenses(e.target.value)} className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
+                <Input type="number" min="0" value={expenses} onChange={e => setExpenses(e.target.value)} placeholder="e.g. 600" className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
                 <p className="text-xs text-[#64748B]">Include costs such as software, internet, equipment, workspace, etc.</p>
               </div>
 
               <div className="space-y-2">
                 <Label>Billable hours per month</Label>
-                <Input type="number" min="1" value={hours} onChange={e => setHours(e.target.value)} className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
+                <Input type="number" min="1" value={hours} onChange={e => setHours(e.target.value)} placeholder="e.g. 100" className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
                 <p className="text-xs text-[#64748B]">Estimate the hours you can actually charge clients for.</p>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function CalculatorPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Estimated hours</Label>
-                <Input type="number" min="1" value={projectHours} onChange={e => setProjectHours(e.target.value)} className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
+                <Input type="number" min="1" value={projectHours} onChange={e => setProjectHours(e.target.value)} placeholder="e.g. 25" className="bg-[#0B1020] border-[#27344B] text-white focus-visible:ring-primary" />
               </div>
 
               <div className="space-y-2">
