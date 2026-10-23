@@ -314,7 +314,7 @@ export default function TasksPage() {
                 </div>
 
                 {task.description && (
-                  <p className={`text-sm text-[#C7D0E0] truncate ${task.status === "completed" ? "opacity-50" : ""}`}>
+                  <p className={`text-sm text-[#C7D0E0] line-clamp-2 ${task.status === "completed" ? "opacity-50" : ""}`}>
                     {task.description}
                   </p>
                 )}
