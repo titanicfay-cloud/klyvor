@@ -25,10 +25,10 @@ const navItems: NavGroup[] = [
   ]},
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
   return (
-    <aside className="w-64 h-screen border-r border-[#27344B] bg-[#0B1020] flex flex-col fixed top-0 left-0 z-40 hidden lg:flex">
+    <aside className={`w-64 h-screen border-r border-[#27344B] bg-[#0B1020] flex flex-col fixed top-0 left-0 z-40 ${isMobile ? "flex" : "hidden lg:flex"}`}>
       <div className="h-20 flex items-center px-6 border-b border-[#27344B]">
         <Link href="/dashboard">
           <Image src="/logo.png" alt="KLYVOR" width={160} height={50} className="object-contain w-auto h-10" priority />
