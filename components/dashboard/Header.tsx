@@ -26,6 +26,7 @@ export default function Header({ userEmail, userName }: { userEmail: string, use
   const router = useRouter();
   const supabase = createClient();
   const [mounted, setMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -42,11 +43,13 @@ export default function Header({ userEmail, userName }: { userEmail: string, use
     <header className="h-20 border-b border-[#27344B] bg-[#0B1020]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 sm:px-8">
       <div className="flex items-center gap-4">
         <div className="lg:hidden">
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:bg-[#111A2E]">
               <Menu size={20} />
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]"><Sidebar isMobile={true} /></SheetContent>
+            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]">
+              <Sidebar isMobile={true} onNavigate={() => setIsMobileMenuOpen(false)} />
+            </SheetContent>
           </Sheet>
         </div>
         <div className="hidden sm:block text-sm font-medium text-[#64748B]">{getBreadcrumb(pathname)}</div>
