@@ -1,2 +1,18 @@
-import Placeholder from "@/components/dashboard/Placeholder";
-export default function ProjectsPage() { return <Placeholder title="Project Planner" description="Plan projects, organise milestones, and keep work moving forward. (Coming Soon)" />; }
+import ComingSoon from "@/components/dashboard/ComingSoon";
+import { Calendar } from "lucide-react";
+
+export default function ProjectsPage() {
+  return (
+    <ComingSoon 
+      title="Project Planner"
+      subtitle="Structure your work, manage milestones, and keep complex projects moving forward without the chaos."
+      icon={<Calendar size={32} className="text-secondary" />}
+      accentColor="#7C5CFC"
+      features={[
+        "Visual Kanban Boards",
+        "Milestone Tracking",
+        "Project Timelines",
+      ]}
+    />
+  );
+}
