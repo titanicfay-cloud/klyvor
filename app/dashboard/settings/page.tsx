@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { User, Shield, Settings, Database, AlertTriangle, Download, Loader2, Key
 
 export default function SettingsPage() {
   const supabase = createClient();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("profile");
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -114,7 +116,7 @@ export default function SettingsPage() {
     }).eq("user_id", user?.id);
 
     if (error) toast.error("Failed to save preferences.");
-    else toast.success("Preferences saved successfully.");
+    else { toast.success("Preferences saved successfully."); router.refresh(); }
     setSavingPrefs(false);
   };
 

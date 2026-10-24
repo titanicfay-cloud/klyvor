@@ -13,7 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Search, MoreHorizontal, Edit, Trash2, CheckCircle2, Circle, Clock } from "lucide-react";
-import { formatDate } from "@/lib/utils"; // Import the new helper
+import { formatDate } from "@/lib/utils";
 
 type TaskStatus = "todo" | "in_progress" | "completed";
 type TaskPriority = "low" | "medium" | "high" | "urgent";
@@ -36,7 +36,6 @@ export default function TasksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  // User Preferences
   const [timezone, setTimezone] = useState("UTC");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
 
@@ -56,18 +55,13 @@ export default function TasksPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch Preferences
     const { data: prefs } = await supabase.from("user_preferences").select("timezone, date_format").single();
     if (prefs) {
       setTimezone(prefs.timezone || "UTC");
       setDateFormat(prefs.date_format || "DD/MM/YYYY");
     }
 
-    // Fetch Tasks
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("tasks").select("*").order("created_at", { ascending: false });
 
     if (error) toast.error("LOAD ERROR: " + error.message);
     else setTasks(data || []);
@@ -110,7 +104,6 @@ export default function TasksPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-
     setIsSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -142,17 +135,9 @@ export default function TasksPage() {
   const handleToggleComplete = async (task: Task) => {
     const isCompleted = task.status === "completed";
     const newStatus = isCompleted ? "todo" : "completed";
-    
     setTasks(tasks.map(t => t.id === task.id ? { ...t, status: newStatus } : t));
 
-    const { error } = await supabase
-      .from("tasks")
-      .update({ 
-        status: newStatus,
-        completed_at: newStatus === "completed" ? new Date().toISOString() : null
-      })
-      .eq("id", task.id);
-
+    const { error } = await supabase.from("tasks").update({ status: newStatus, completed_at: newStatus === "completed" ? new Date().toISOString() : null }).eq("id", task.id);
     if (error) {
       toast.error("UPDATE ERROR: " + error.message);
       fetchTasksAndPrefs();
@@ -178,6 +163,10 @@ export default function TasksPage() {
     return "bg-[#0B1020] text-[#C7D0E0] border-[#27344B]";
   };
 
+  // Helper to render formatted text in the filters
+  const getStatusText = (val: string) => val === "all" ? "All Statuses" : val === "todo" ? "To Do" : val === "in_progress" ? "In Progress" : "Completed";
+  const getPriorityText = (val: string) => val === "all" ? "All Priorities" : val === "urgent" ? "Urgent" : val === "high" ? "High" : val === "medium" ? "Medium" : "Low";
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -186,9 +175,7 @@ export default function TasksPage() {
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Your Tasks</h1>
           <p className="text-[#C7D0E0]">Bring clarity to your workload. Organise priorities, manage deadlines, and keep your next steps within reach.</p>
         </div>
-        <Button onClick={handleOpenCreate} className="bg-klyvor-gradient text-white hover:opacity-90 font-semibold h-11 px-6 shrink-0">
-          <Plus size={18} className="mr-2" /> New Task
-        </Button>
+        <Button onClick={handleOpenCreate} className="bg-klyvor-gradient text-white hover:opacity-90 font-semibold h-11 px-6 shrink-0"><Plus size={18} className="mr-2" /> New Task</Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -199,10 +186,7 @@ export default function TasksPage() {
           { label: "Completed", value: tasks.filter(t => t.status === "completed").length, icon: CheckCircle2, color: "text-success" },
         ].map((stat, i) => (
           <div key={i} className="bg-[#111A2E] border border-[#27344B] p-4 rounded-xl flex items-center justify-between">
-            <div>
-              <p className="text-xs text-[#C7D0E0] font-medium mb-1">{stat.label}</p>
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
-            </div>
+            <div><p className="text-xs text-[#C7D0E0] font-medium mb-1">{stat.label}</p><p className="text-2xl font-bold text-white">{stat.value}</p></div>
             <stat.icon className={stat.color} size={24} />
           </div>
         ))}
@@ -215,22 +199,19 @@ export default function TasksPage() {
         </div>
         <div className="flex gap-3">
           <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as string)}>
-            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10"><SelectValue placeholder="Status" /></SelectTrigger>
+            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
+              <SelectValue placeholder="Status">{getStatusText(statusFilter)}</SelectValue>
+            </SelectTrigger>
             <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="todo">To Do</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem><SelectItem value="todo">To Do</SelectItem><SelectItem value="in_progress">In Progress</SelectItem><SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
           <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as string)}>
-            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10"><SelectValue placeholder="Priority" /></SelectTrigger>
+            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
+              <SelectValue placeholder="Priority">{getPriorityText(priorityFilter)}</SelectValue>
+            </SelectTrigger>
             <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
-              <SelectItem value="all">All Priorities</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="all">All Priorities</SelectItem><SelectItem value="urgent">Urgent</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="low">Low</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -262,7 +243,6 @@ export default function TasksPage() {
                 {task.due_date && (
                   <div className="flex items-center gap-1 text-xs text-[#F59E0B] mt-2">
                     <Clock size={12} />
-                    {/* FIXED: Applied timezone and date format to the due date */}
                     <span>Due {formatDate(task.due_date, timezone, dateFormat)}</span>
                   </div>
                 )}
@@ -288,22 +268,23 @@ export default function TasksPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Status</Label>
                 <Select value={status} onValueChange={(val) => setStatus(val as TaskStatus)}>
-                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
+                    <SelectValue>{status === "todo" ? "To Do" : status === "in_progress" ? "In Progress" : "Completed"}</SelectValue>
+                  </SelectTrigger>
                   <SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="todo">To Do</SelectItem><SelectItem value="in_progress">In Progress</SelectItem><SelectItem value="completed">Completed</SelectItem></SelectContent>
                 </Select>
               </div>
               <div className="space-y-2"><Label>Priority</Label>
                 <Select value={priority} onValueChange={(val) => setPriority(val as TaskPriority)}>
-                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
+                    <SelectValue>{priority === "low" ? "Low" : priority === "medium" ? "Medium" : priority === "high" ? "High" : "Urgent"}</SelectValue>
+                  </SelectTrigger>
                   <SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
             <div className="space-y-2"><Label htmlFor="dueDate">Due date (Optional)</Label><Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] [color-scheme:dark]" /></div>
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-[#C7D0E0] hover:text-white">Cancel</Button>
-              <Button type="submit" disabled={isSubmitting || !title.trim()} className="bg-klyvor-gradient text-white">{isSubmitting ? "Saving..." : editingTask ? "Save Changes" : "Create Task"}</Button>
-            </DialogFooter>
+            <DialogFooter className="pt-4"><Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-[#C7D0E0] hover:text-white">Cancel</Button><Button type="submit" disabled={isSubmitting || !title.trim()} className="bg-klyvor-gradient text-white">{isSubmitting ? "Saving..." : editingTask ? "Save Changes" : "Create Task"}</Button></DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
