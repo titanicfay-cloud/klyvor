@@ -171,7 +171,7 @@ export default function DocumentsPage() {
                   <div className="flex justify-between items-start mb-1">
                     <h3 className={`text-sm font-semibold truncate pr-2 ${activeDoc?.id === doc.id ? 'text-primary' : 'text-white'}`}>{doc.title || "Untitled Document"}</h3>
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="text-[#64748B] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity outline-none"><MoreHorizontal size={16} /></DropdownMenuTrigger>
+                      <DropdownMenuTrigger className="text-[#64748B] hover:text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity outline-none"><MoreHorizontal size={16} /></DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-[#111A2E] border-[#27344B] text-white">
                         <DropdownMenuItem onClick={(e) => handleDuplicate(doc, e)} className="cursor-pointer hover:bg-[#0B1020]"><Copy size={14} className="mr-2" /> Duplicate</DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => handleDelete(doc.id, e)} className="cursor-pointer text-[#EF4444] hover:bg-[#EF4444]/10"><Trash2 size={14} className="mr-2" /> Delete</DropdownMenuItem>
