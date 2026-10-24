@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { 
   MessageCircle, X, LifeBuoy, CheckCircle2, Loader2, 
-  ArrowLeft, ShieldAlert, FileText, CheckSquare, Calculator, User
+  ArrowLeft, ShieldAlert, FileText, CheckSquare, Calculator, User, 
+  AlertTriangle, Shield, MessageSquare
 } from "lucide-react";
 
 type ViewState = "menu" | "form" | "success";
@@ -96,7 +97,7 @@ export default function SupportWidget() {
       
       {/* FLOATING PANEL */}
       {isOpen && (
-        <div className="mb-4 w-[340px] sm:w-[380px] h-[500px] max-h-[80vh] bg-[#0B1020] border border-[#27344B] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-300">
+        <div className="mb-4 w-[340px] sm:w-[380px] h-[520px] max-h-[80vh] bg-[#0B1020] border border-[#27344B] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-300">
           
           {/* Header */}
           <div className="bg-[#111A2E] border-b border-[#27344B] p-4 flex items-center justify-between shrink-0">
@@ -118,34 +119,47 @@ export default function SupportWidget() {
           <div className="flex-1 overflow-y-auto p-5">
             
             {view === "menu" && (
-              <div className="space-y-6 animate-in fade-in">
+              <div className="space-y-5 animate-in fade-in">
                 <div>
                   <h4 className="text-white font-medium mb-1">Hi there! 👋</h4>
-                  <p className="text-[#C7D0E0] text-sm leading-relaxed">How can we help you today? Find a quick answer or send us a message.</p>
+                  <p className="text-[#C7D0E0] text-sm leading-relaxed">How can we help you today? Select a topic to get started.</p>
                 </div>
 
+                {/* FIXED: Synced all options with the form dropdown */}
                 <div className="grid grid-cols-1 gap-2">
-                  <button onClick={() => handleOpenForm("Account & Login")} className="flex items-center gap-3 p-3 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                  <button onClick={() => handleOpenForm("Account & Login")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
                     <User size={16} className="text-[#64748B] group-hover:text-primary" />
                     <span className="text-sm text-[#C7D0E0] group-hover:text-white">Account & Login</span>
                   </button>
-                  <button onClick={() => handleOpenForm("Tasks & Productivity")} className="flex items-center gap-3 p-3 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                  <button onClick={() => handleOpenForm("Technical Problem")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                    <AlertTriangle size={16} className="text-[#64748B] group-hover:text-primary" />
+                    <span className="text-sm text-[#C7D0E0] group-hover:text-white">Technical Problem</span>
+                  </button>
+                  <button onClick={() => handleOpenForm("Tasks & Productivity")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
                     <CheckSquare size={16} className="text-[#64748B] group-hover:text-primary" />
                     <span className="text-sm text-[#C7D0E0] group-hover:text-white">Tasks & Productivity</span>
                   </button>
-                  <button onClick={() => handleOpenForm("Documents & Notes")} className="flex items-center gap-3 p-3 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                  <button onClick={() => handleOpenForm("Documents & Notes")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
                     <FileText size={16} className="text-[#64748B] group-hover:text-primary" />
                     <span className="text-sm text-[#C7D0E0] group-hover:text-white">Documents & Notes</span>
                   </button>
-                  <button onClick={() => handleOpenForm("Pricing Calculator")} className="flex items-center gap-3 p-3 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                  <button onClick={() => handleOpenForm("Pricing Calculator")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
                     <Calculator size={16} className="text-[#64748B] group-hover:text-primary" />
                     <span className="text-sm text-[#C7D0E0] group-hover:text-white">Pricing Calculator</span>
                   </button>
+                  <button onClick={() => handleOpenForm("Privacy & Data Request")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                    <Shield size={16} className="text-[#64748B] group-hover:text-primary" />
+                    <span className="text-sm text-[#C7D0E0] group-hover:text-white">Privacy & Data Request</span>
+                  </button>
+                  <button onClick={() => handleOpenForm("Feedback & Suggestions")} className="flex items-center gap-3 p-2.5 bg-[#111A2E] border border-[#27344B] rounded-lg hover:border-primary/50 transition-colors text-left group">
+                    <MessageSquare size={16} className="text-[#64748B] group-hover:text-primary" />
+                    <span className="text-sm text-[#C7D0E0] group-hover:text-white">Feedback & Suggestions</span>
+                  </button>
                 </div>
 
-                <div className="pt-4 border-t border-[#27344B]">
+                <div className="pt-2">
                   <Button onClick={() => handleOpenForm("Other")} className="w-full bg-klyvor-gradient text-white hover:opacity-90">
-                    Contact Support
+                    Other / General Inquiry
                   </Button>
                 </div>
               </div>
@@ -158,19 +172,19 @@ export default function SupportWidget() {
                 </button>
                 <h4 className="text-white font-semibold mb-4">Send us a message</h4>
                 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-1.5">
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <div className="space-y-1">
                     <Label className="text-xs text-[#C7D0E0]">Name</Label>
-                    <Input value={name} onChange={e => setName(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white h-9 text-sm focus-visible:ring-primary" />
+                    <Input value={name} onChange={e => setName(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white h-8 text-sm focus-visible:ring-primary" />
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <Label className="text-xs text-[#C7D0E0]">Email</Label>
-                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white h-9 text-sm focus-visible:ring-primary" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white h-8 text-sm focus-visible:ring-primary" />
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <Label className="text-xs text-[#C7D0E0]">Topic</Label>
                     <Select value={topic} onValueChange={(val) => setTopic(val as string)} required>
-                      <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white h-9 text-sm">
+                      <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white h-8 text-sm">
                         <SelectValue placeholder="Select a topic" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
@@ -185,21 +199,21 @@ export default function SupportWidget() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <Label className="text-xs text-[#C7D0E0]">Subject</Label>
-                    <Input value={subject} onChange={e => setSubject(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white h-9 text-sm focus-visible:ring-primary" />
+                    <Input value={subject} onChange={e => setSubject(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white h-8 text-sm focus-visible:ring-primary" />
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <Label className="text-xs text-[#C7D0E0]">Message</Label>
-                    <Textarea value={message} onChange={e => setMessage(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white text-sm focus-visible:ring-primary resize-none h-24" />
+                    <Textarea value={message} onChange={e => setMessage(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white text-sm focus-visible:ring-primary resize-none h-20" />
                   </div>
                   
                   <div className="flex items-start gap-2 bg-[#EF4444]/10 p-2 rounded border border-[#EF4444]/20">
-                    <ShieldAlert size={14} className="text-[#EF4444] shrink-0 mt-0.5" />
-                    <p className="text-[10px] text-[#EF4444] leading-tight">Please never include your password or authentication codes in support messages.</p>
+                    <ShieldAlert size={12} className="text-[#EF4444] shrink-0 mt-0.5" />
+                    <p className="text-[9px] text-[#EF4444] leading-tight">Please never include your password or authentication codes.</p>
                   </div>
 
-                  <Button type="submit" disabled={isSubmitting || !topic} className="w-full bg-klyvor-gradient text-white h-9 text-sm">
+                  <Button type="submit" disabled={isSubmitting || !topic} className="w-full bg-klyvor-gradient text-white h-9 text-sm mt-2">
                     {isSubmitting ? <><Loader2 size={14} className="mr-2 animate-spin" /> Sending...</> : "Send Request"}
                   </Button>
                 </form>
