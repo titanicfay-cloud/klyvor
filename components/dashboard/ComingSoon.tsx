@@ -114,7 +114,7 @@ export default function ComingSoon({ title, subtitle, icon, features, accentColo
           disabled={loading || hasJoined}
           className={`px-8 py-6 rounded-full font-bold text-base transition-all ${
             hasJoined 
-              ? "bg-success/20 text-success border border-success/30 cursor-not-allowed hover:bg-success/20" 
+              ? "bg-[#0B1020] text-[#22C55E] border border-[#22C55E] cursor-not-allowed hover:bg-[#0B1020]" 
               : "bg-white text-[#0B1020] hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
           }`}
         >
