@@ -219,7 +219,11 @@ export default function DocumentsPage() {
               <div className="flex items-center gap-2">
                 <Select value={activeDoc.project_id || "none"} onValueChange={(val) => handleLinkProject(val as string)}>
                   <SelectTrigger className="w-[180px] h-8 bg-[#0B1020] border-[#27344B] text-[#C7D0E0] text-xs">
-                    <SelectValue placeholder="Link to Project" />
+                    <SelectValue placeholder="Link to Project">
+                      {activeDoc.project_id === "none" || !activeDoc.project_id
+                        ? "No Project"
+                        : projects.find(p => p.id === activeDoc.project_id)?.name || "Select a project"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
                     <SelectItem value="none">No Project</SelectItem>
