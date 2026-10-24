@@ -30,17 +30,16 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Company</h3>
             <ul className="space-y-3">
               <li><Link href="/#about" className="text-muted-foreground hover:text-primary text-sm transition-colors">About KLYVOR</Link></li>
-              <li><Link href="/help" className="text-muted-foreground hover:text-primary text-sm transition-colors">Contact</Link></li>
+              <li><Link href="/#how-it-works" className="text-muted-foreground hover:text-primary text-sm transition-colors">How It Works</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Legal</h3>
             <ul className="space-y-3">
-              {/* FIXED: Pointing to the actual routes */}
+              {/* Clean public legal links */}
               <li><Link href="/privacy" className="text-muted-foreground hover:text-primary text-sm transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="text-muted-foreground hover:text-primary text-sm transition-colors">Terms of Service</Link></li>
-              <li><Link href="/help" className="text-muted-foreground hover:text-primary text-sm transition-colors">Help & Support</Link></li>
             </ul>
           </div>
         </div>
