@@ -19,32 +19,37 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Product</h3>
             <ul className="space-y-3">
-              <li><Link href="#platform" className="text-muted-foreground hover:text-primary text-sm transition-colors">Platform</Link></li>
-              <li><Link href="#productivity" className="text-muted-foreground hover:text-primary text-sm transition-colors">Productivity</Link></li>
-              <li><Link href="#documents" className="text-muted-foreground hover:text-primary text-sm transition-colors">Documents & Notes</Link></li>
-              <li><Link href="#business" className="text-muted-foreground hover:text-primary text-sm transition-colors">Business Tools</Link></li>
+              <li><Link href="/#platform" className="text-muted-foreground hover:text-primary text-sm transition-colors">Platform</Link></li>
+              <li><Link href="/#productivity" className="text-muted-foreground hover:text-primary text-sm transition-colors">Productivity</Link></li>
+              <li><Link href="/#documents" className="text-muted-foreground hover:text-primary text-sm transition-colors">Documents & Notes</Link></li>
+              <li><Link href="/#business" className="text-muted-foreground hover:text-primary text-sm transition-colors">Business Tools</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Company</h3>
             <ul className="space-y-3">
-              <li><Link href="#about" className="text-muted-foreground hover:text-primary text-sm transition-colors">About KLYVOR</Link></li>
-              <li><Link href="#contact" className="text-muted-foreground hover:text-primary text-sm transition-colors">Contact</Link></li>
+              <li><Link href="/#about" className="text-muted-foreground hover:text-primary text-sm transition-colors">About KLYVOR</Link></li>
+              <li><Link href="/help" className="text-muted-foreground hover:text-primary text-sm transition-colors">Contact</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Legal</h3>
             <ul className="space-y-3">
-              <li><Link href="#privacy" className="text-muted-foreground hover:text-primary text-sm transition-colors">Privacy Policy</Link></li>
-              <li><Link href="#terms" className="text-muted-foreground hover:text-primary text-sm transition-colors">Terms of Service</Link></li>
+              {/* FIXED: Pointing to the actual routes */}
+              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary text-sm transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-muted-foreground hover:text-primary text-sm transition-colors">Terms of Service</Link></li>
+              <li><Link href="/help" className="text-muted-foreground hover:text-primary text-sm transition-colors">Help & Support</Link></li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">© {currentYear} KLYVOR. All rights reserved.</p>
+          <div className="flex space-x-6">
+            <Link href="/login" className="text-muted-foreground hover:text-white text-sm transition-colors">Sign In</Link>
+          </div>
         </div>
       </div>
     </footer>
