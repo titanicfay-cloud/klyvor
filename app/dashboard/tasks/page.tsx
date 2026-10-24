@@ -12,10 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { 
-  Plus, Search, MoreHorizontal, Edit, Trash2, 
-  CheckCircle2, Circle, Clock
-} from "lucide-react";
+import { Plus, Search, MoreHorizontal, Edit, Trash2, CheckCircle2, Circle, Clock } from "lucide-react";
+import { formatDate } from "@/lib/utils"; // Import the new helper
 
 type TaskStatus = "todo" | "in_progress" | "completed";
 type TaskPriority = "low" | "medium" | "high" | "urgent";
@@ -38,6 +36,10 @@ export default function TasksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
+  // User Preferences
+  const [timezone, setTimezone] = useState("UTC");
+  const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -49,31 +51,32 @@ export default function TasksPage() {
   const [dueDate, setDueDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchTasks = async () => {
+  const fetchTasksAndPrefs = async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast.error("You must be logged in to view tasks.");
-      setLoading(false);
-      return;
+    if (!user) return;
+
+    // Fetch Preferences
+    const { data: prefs } = await supabase.from("user_preferences").select("timezone, date_format").single();
+    if (prefs) {
+      setTimezone(prefs.timezone || "UTC");
+      setDateFormat(prefs.date_format || "DD/MM/YYYY");
     }
 
+    // Fetch Tasks
     const { data, error } = await supabase
       .from("tasks")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) {
-      toast.error("LOAD ERROR: " + error.message);
-    } else {
-      setTasks(data || []);
-    }
+    if (error) toast.error("LOAD ERROR: " + error.message);
+    else setTasks(data || []);
+    
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchTasks();
+    fetchTasksAndPrefs();
   }, []);
 
   const filteredTasks = tasks.filter((task) => {
@@ -110,12 +113,7 @@ export default function TasksPage() {
 
     setIsSubmitting(true);
     const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      toast.error("Authentication error.");
-      setIsSubmitting(false);
-      return;
-    }
+    if (!user) return;
 
     const taskData = {
       title: title.trim(),
@@ -138,7 +136,7 @@ export default function TasksPage() {
 
     setIsSubmitting(false);
     setIsModalOpen(false);
-    fetchTasks();
+    fetchTasksAndPrefs();
   };
 
   const handleToggleComplete = async (task: Task) => {
@@ -157,7 +155,7 @@ export default function TasksPage() {
 
     if (error) {
       toast.error("UPDATE ERROR: " + error.message);
-      fetchTasks();
+      fetchTasksAndPrefs();
     } else {
       toast.success(isCompleted ? "Task reopened." : "Task marked as completed.");
     }
@@ -165,11 +163,9 @@ export default function TasksPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this task?")) return;
-
     const { error } = await supabase.from("tasks").delete().eq("id", id);
-    if (error) {
-      toast.error("DELETE ERROR: " + error.message);
-    } else {
+    if (error) toast.error("DELETE ERROR: " + error.message);
+    else {
       toast.success("Task deleted.");
       setTasks(tasks.filter(t => t.id !== id));
     }
@@ -182,26 +178,8 @@ export default function TasksPage() {
     return "bg-[#0B1020] text-[#C7D0E0] border-[#27344B]";
   };
 
-  const getStatusLabel = (val: string) => {
-    if (val === "all") return "All Statuses";
-    if (val === "todo") return "To Do";
-    if (val === "in_progress") return "In Progress";
-    if (val === "completed") return "Completed";
-    return "All Statuses";
-  };
-
-  const getPriorityLabel = (val: string) => {
-    if (val === "all") return "All Priorities";
-    if (val === "urgent") return "Urgent";
-    if (val === "high") return "High";
-    if (val === "medium") return "Medium";
-    if (val === "low") return "Low";
-    return "All Priorities";
-  };
-
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
-      
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div>
           <span className="text-primary font-bold text-xs tracking-[0.2em] uppercase mb-2 block">Productivity</span>
@@ -233,21 +211,11 @@ export default function TasksPage() {
       <div className="flex flex-col md:flex-row gap-3 bg-[#111A2E] p-3 rounded-xl border border-[#27344B]">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" size={16} />
-          <Input 
-            placeholder="Search your tasks..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-[#0B1020] border-[#27344B] text-white placeholder:text-[#64748B] h-10 focus-visible:ring-1 focus-visible:ring-primary"
-          />
+          <Input placeholder="Search your tasks..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-[#0B1020] border-[#27344B] text-white placeholder:text-[#64748B] h-10 focus-visible:ring-1 focus-visible:ring-primary" />
         </div>
         <div className="flex gap-3">
-          
           <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as string)}>
-            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
-              <SelectValue placeholder="Status">
-                {getStatusLabel(statusFilter)}
-              </SelectValue>
-            </SelectTrigger>
+            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="todo">To Do</SelectItem>
@@ -255,13 +223,8 @@ export default function TasksPage() {
               <SelectItem value="completed">Completed</SelectItem>
             </SelectContent>
           </Select>
-
           <Select value={priorityFilter} onValueChange={(val) => setPriorityFilter(val as string)}>
-            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
-              <SelectValue placeholder="Priority">
-                {getPriorityLabel(priorityFilter)}
-              </SelectValue>
-            </SelectTrigger>
+            <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10"><SelectValue placeholder="Priority" /></SelectTrigger>
             <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
               <SelectItem value="all">All Priorities</SelectItem>
               <SelectItem value="urgent">Urgent</SelectItem>
@@ -281,63 +244,34 @@ export default function TasksPage() {
             <CheckCircle2 className="w-12 h-12 text-[#C7D0E0] mx-auto mb-4" />
             <h3 className="text-white font-medium mb-2">A clearer workload starts here.</h3>
             <p className="text-sm text-[#C7D0E0] mb-6 max-w-md mx-auto">Create your first task to organise what needs to get done, set priorities, and keep track of deadlines.</p>
-            <Button onClick={handleOpenCreate} className="bg-klyvor-gradient text-white hover:opacity-90">
-              Create Your First Task
-            </Button>
+            <Button onClick={handleOpenCreate} className="bg-klyvor-gradient text-white hover:opacity-90">Create Your First Task</Button>
           </div>
         ) : (
           filteredTasks.map((task) => (
             <div key={task.id} className="flex items-start sm:items-center gap-4 bg-[#0B1020] border border-[#27344B] p-4 rounded-xl hover:border-primary/30 transition-colors group">
-              
-              <Checkbox 
-                checked={task.status === "completed"}
-                onCheckedChange={() => handleToggleComplete(task)}
-                className="mt-1 sm:mt-0 border-[#27344B] data-[state=checked]:bg-success data-[state=checked]:border-success"
-              />
-              
+              <Checkbox checked={task.status === "completed"} onCheckedChange={() => handleToggleComplete(task)} className="mt-1 sm:mt-0 border-[#27344B] data-[state=checked]:bg-success data-[state=checked]:border-success" />
               <div className="flex-1 min-w-0">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
-                  <h3 className={`text-white font-medium truncate ${task.status === "completed" ? "line-through opacity-50" : ""}`}>
-                    {task.title}
-                  </h3>
-                  
+                  <h3 className={`text-white font-medium whitespace-pre-wrap break-words ${task.status === "completed" ? "line-through opacity-50" : ""}`}>{task.title}</h3>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${getPriorityColor(task.priority)}`}>
-                      {task.priority}
-                    </Badge>
-                    {task.status === "in_progress" && (
-                      <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-[#0B1020] text-[#00D4FF] border-[#00D4FF]">
-                        In Progress
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${getPriorityColor(task.priority)}`}>{task.priority}</Badge>
+                    {task.status === "in_progress" && <Badge variant="outline" className="text-[10px] uppercase tracking-wider bg-[#0B1020] text-[#00D4FF] border-[#00D4FF]">In Progress</Badge>}
                   </div>
                 </div>
-
-                {task.description && (
-                  <p className={`text-sm text-[#C7D0E0] whitespace-pre-wrap break-words ${task.status === "completed" ? "opacity-50" : ""}`}>
-                    {task.description}
-                  </p>
-                )}
-
+                {task.description && <p className={`text-sm text-[#C7D0E0] whitespace-pre-wrap break-words ${task.status === "completed" ? "opacity-50" : ""}`}>{task.description}</p>}
                 {task.due_date && (
                   <div className="flex items-center gap-1 text-xs text-[#F59E0B] mt-2">
                     <Clock size={12} />
-                    <span>Due {new Date(task.due_date).toLocaleDateString()}</span>
+                    {/* FIXED: Applied timezone and date format to the due date */}
+                    <span>Due {formatDate(task.due_date, timezone, dateFormat)}</span>
                   </div>
                 )}
               </div>
-
               <DropdownMenu>
-                <DropdownMenuTrigger className="text-[#C7D0E0] hover:text-white outline-none h-8 w-8 flex items-center justify-center shrink-0">
-                  <MoreHorizontal size={18} />
-                </DropdownMenuTrigger>
+                <DropdownMenuTrigger className="text-[#C7D0E0] hover:text-white outline-none h-8 w-8 flex items-center justify-center shrink-0"><MoreHorizontal size={18} /></DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-[#111A2E] border-[#27344B] text-white">
-                  <DropdownMenuItem onClick={() => handleOpenEdit(task)} className="cursor-pointer hover:bg-[#0B1020]">
-                    <Edit size={14} className="mr-2" /> Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleDelete(task.id)} className="cursor-pointer text-[#EF4444] hover:bg-[#EF4444]/10">
-                    <Trash2 size={14} className="mr-2" /> Delete
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleOpenEdit(task)} className="cursor-pointer hover:bg-[#0B1020]"><Edit size={14} className="mr-2" /> Edit</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDelete(task.id)} className="cursor-pointer text-[#EF4444] hover:bg-[#EF4444]/10"><Trash2 size={14} className="mr-2" /> Delete</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -347,91 +281,32 @@ export default function TasksPage() {
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="bg-[#0B1020] border-[#27344B] text-white sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{editingTask ? "Edit task" : "Create a task"}</DialogTitle>
-            <DialogDescription className="text-[#C7D0E0]">
-              {editingTask ? "Update the details for this task." : "Capture what needs to be done and decide what matters most."}
-            </DialogDescription>
-          </DialogHeader>
-
+          <DialogHeader><DialogTitle>{editingTask ? "Edit task" : "Create a task"}</DialogTitle><DialogDescription className="text-[#C7D0E0]">{editingTask ? "Update the details for this task." : "Capture what needs to be done and decide what matters most."}</DialogDescription></DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Task title <span className="text-[#EF4444]">*</span></Label>
-              <Input 
-                id="title" 
-                placeholder="What needs to get done?" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                placeholder="Add details, notes, or useful context..." 
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] resize-none h-24"
-              />
-            </div>
-
+            <div className="space-y-2"><Label htmlFor="title">Task title <span className="text-[#EF4444]">*</span></Label><Input id="title" placeholder="What needs to get done?" value={title} onChange={(e) => setTitle(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF]" /></div>
+            <div className="space-y-2"><Label htmlFor="description">Description</Label><Textarea id="description" placeholder="Add details, notes, or useful context..." value={description} onChange={(e) => setDescription(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] resize-none h-24" /></div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Status</Label>
+              <div className="space-y-2"><Label>Status</Label>
                 <Select value={status} onValueChange={(val) => setStatus(val as TaskStatus)}>
-                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
-                    <SelectItem value="todo">To Do</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                  </SelectContent>
+                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="todo">To Do</SelectItem><SelectItem value="in_progress">In Progress</SelectItem><SelectItem value="completed">Completed</SelectItem></SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <Label>Priority</Label>
+              <div className="space-y-2"><Label>Priority</Label>
                 <Select value={priority} onValueChange={(val) => setPriority(val as TaskPriority)}>
-                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
+                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="dueDate">Due date (Optional)</Label>
-              <Input 
-                id="dueDate" 
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] [color-scheme:dark]"
-              />
-            </div>
-
+            <div className="space-y-2"><Label htmlFor="dueDate">Due date (Optional)</Label><Input id="dueDate" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] [color-scheme:dark]" /></div>
             <DialogFooter className="pt-4">
-              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-[#C7D0E0] hover:text-white">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting || !title.trim()} className="bg-klyvor-gradient text-white">
-                {isSubmitting ? "Saving..." : editingTask ? "Save Changes" : "Create Task"}
-              </Button>
+              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-[#C7D0E0] hover:text-white">Cancel</Button>
+              <Button type="submit" disabled={isSubmitting || !title.trim()} className="bg-klyvor-gradient text-white">{isSubmitting ? "Saving..." : editingTask ? "Save Changes" : "Create Task"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
