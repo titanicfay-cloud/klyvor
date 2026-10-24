@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { CheckSquare, FileText, Calculator, LayoutGrid, ArrowRight, Plus, Calendar, Briefcase, Clock } from "lucide-react";
+import { CheckSquare, FileText, Calculator, LayoutGrid, ArrowRight, Plus, Calendar, Briefcase, Clock, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function DashboardOverview() {
@@ -10,22 +10,17 @@ export default async function DashboardOverview() {
   const fullName = user?.user_metadata?.full_name || "";
   const firstName = fullName.split(" ")[0] || "there";
 
-  const tools = [
-    { name: "Task Manager", desc: "Organise tasks, priorities, and deadlines in one place.", icon: CheckSquare, href: "/dashboard/tasks" },
-    { name: "Documents & Notes", desc: "Capture ideas, write notes, and keep important information organised.", icon: FileText, href: "/dashboard/documents" },
-    { name: "Pricing Calculator", desc: "Estimate sustainable rates using your income goals, expenses, and working hours.", icon: Calculator, href: "/dashboard/calculator" },
-    { name: "Tool Directory", desc: "Explore available tools and discover what's coming next.", icon: LayoutGrid, href: "/dashboard/directory" },
-  ];
-
   return (
     <div className="max-w-6xl mx-auto space-y-10 pb-20 animate-in fade-in duration-500">
       
+      {/* Welcome Header */}
       <div>
         <span className="text-primary font-bold text-xs tracking-[0.2em] uppercase mb-2 block">Your Workspace</span>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Welcome back, {firstName}.</h1>
         <p className="text-[#C7D0E0]">Your workspace is ready. What would you like to work on today?</p>
       </div>
 
+      {/* Quick Actions (Row) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link href="/dashboard/tasks" className="flex items-center gap-4 bg-[#111A2E] border border-[#27344B] p-4 rounded-xl hover:border-primary/50 transition-colors group">
           <div className="w-10 h-10 rounded-full bg-[#0B1020] border border-[#27344B] flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-[#0B1020] transition-colors shrink-0">
@@ -58,27 +53,78 @@ export default async function DashboardOverview() {
         </Link>
       </div>
 
+      {/* BENTO GRID: YOUR TOOLS */}
       <div>
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-white">Your Tools</h2>
-          <p className="text-sm text-[#64748B]">Keep your most useful tools within reach.</p>
+          <h2 className="text-xl font-bold text-white">Your Workspace</h2>
+          <p className="text-sm text-[#64748B]">Jump directly into your active projects.</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {tools.map((tool) => (
-            <Link key={tool.name} href={tool.href} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-colors flex flex-col h-full group">
-              <div className="w-10 h-10 rounded-lg bg-[#111A2E] border border-[#27344B] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <tool.icon className="text-primary" size={20} />
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[minmax(180px,auto)]">
+          
+          {/* Task Manager (Large) */}
+          <Link href="/dashboard/tasks" className="md:col-span-2 bg-gradient-to-br from-[#111A2E] to-[#0B1020] border border-[#27344B] p-6 rounded-2xl relative overflow-hidden group hover:border-primary/50 transition-all hover:shadow-[0_0_30px_rgba(0,212,255,0.05)] flex flex-col justify-between">
+            <CheckSquare className="absolute -bottom-8 -right-8 w-48 h-48 text-white/[0.03] group-hover:text-primary/[0.05] transition-colors rotate-12 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-[#0B1020] border border-[#27344B] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <CheckSquare className="text-primary" size={24} />
               </div>
-              <h3 className="text-white font-semibold mb-2">{tool.name}</h3>
-              <p className="text-xs text-[#64748B] mb-6 flex-grow leading-relaxed">{tool.desc}</p>
-              <div className="text-primary text-xs font-semibold flex items-center gap-1 mt-auto">
-                Open Tool <ArrowRight size={14} />
+              <h3 className="text-2xl font-bold text-white mb-2">Task Manager</h3>
+              <p className="text-sm text-[#C7D0E0] max-w-sm">Organise tasks, set priorities, and keep track of deadlines in one focused place.</p>
+            </div>
+            <div className="relative z-10 flex items-center gap-2 text-primary font-semibold mt-8 text-sm">
+              Open Tasks <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Documents (Tall) */}
+          <Link href="/dashboard/documents" className="md:col-span-1 md:row-span-2 bg-[#0B1020] border border-[#27344B] p-6 rounded-2xl relative overflow-hidden group hover:border-secondary/50 transition-all hover:shadow-[0_0_30px_rgba(124,92,252,0.05)] flex flex-col justify-between">
+            <FileText className="absolute -bottom-10 -right-10 w-64 h-64 text-white/[0.02] group-hover:text-secondary/[0.05] transition-colors -rotate-12 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-[#111A2E] border border-[#27344B] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <FileText className="text-secondary" size={24} />
               </div>
-            </Link>
-          ))}
+              <h3 className="text-xl font-bold text-white mb-2">Documents & Notes</h3>
+              <p className="text-sm text-[#C7D0E0]">Capture ideas, write drafts, and keep your knowledge base organised with autosave.</p>
+            </div>
+            <div className="relative z-10 flex items-center gap-2 text-secondary font-semibold mt-8 text-sm">
+              Write Document <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Calculator (Small) */}
+          <Link href="/dashboard/calculator" className="md:col-span-1 bg-[#0B1020] border border-[#27344B] p-6 rounded-2xl relative overflow-hidden group hover:border-success/50 transition-all hover:shadow-[0_0_30px_rgba(34,197,94,0.05)] flex flex-col justify-between">
+            <Calculator className="absolute -bottom-6 -right-6 w-32 h-32 text-white/[0.03] group-hover:text-success/[0.05] transition-colors pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-[#111A2E] border border-[#27344B] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Calculator className="text-success" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Pricing Calculator</h3>
+              <p className="text-sm text-[#C7D0E0]">Estimate sustainable rates.</p>
+            </div>
+            <div className="relative z-10 flex items-center gap-2 text-success font-semibold mt-6 text-sm">
+              Calculate <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Directory (Small) */}
+          <Link href="/dashboard/directory" className="md:col-span-1 bg-[#111A2E] border border-[#27344B] p-6 rounded-2xl relative overflow-hidden group hover:border-white/30 transition-all hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] flex flex-col justify-between">
+            <LayoutGrid className="absolute -bottom-6 -right-6 w-32 h-32 text-white/[0.03] group-hover:text-white/[0.08] transition-colors pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-12 h-12 rounded-xl bg-[#0B1020] border border-[#27344B] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <LayoutGrid className="text-white" size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Explore Directory</h3>
+              <p className="text-sm text-[#C7D0E0]">Discover all KLYVOR tools.</p>
+            </div>
+            <div className="relative z-10 flex items-center gap-2 text-white font-semibold mt-6 text-sm">
+              View All <ArrowUpRight size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            </div>
+          </Link>
         </div>
       </div>
 
+      {/* Recent Activity (Empty State) */}
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold text-white">Recent Activity</h2>
@@ -89,7 +135,7 @@ export default async function DashboardOverview() {
           <h3 className="text-white font-medium mb-2">Your workspace is just getting started.</h3>
           <p className="text-sm text-[#64748B] mb-6 max-w-md mx-auto">Tasks, documents, and saved calculations will appear here as you begin using KLYVOR.</p>
           
-          {/* FIXED: Removed 'asChild' and wrapped the Link around the Button */}
+          {/* FIXED: Wrapped Link outside of Button to avoid asChild error */}
           <Link href="/dashboard/directory">
             <Button variant="outline" className="border-[#27344B] text-white hover:bg-[#111A2E]">
               Explore your tools
@@ -99,6 +145,7 @@ export default async function DashboardOverview() {
         </div>
       </div>
 
+      {/* Coming Soon Preview */}
       <div>
         <div className="mb-4">
           <h2 className="text-xl font-bold text-white">More Possibilities Ahead</h2>
