@@ -20,7 +20,7 @@ const navItems: NavGroup[] = [
       { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator },
   ]},
   { title: "EXPLORE", items: [
-      { label: "Project Planner", href: "/dashboard/projects", icon: Calendar, soon: true },
+      { label: "Project Planner", href: "/dashboard/projects", icon: Calendar },
       { label: "Business Tools", href: "/dashboard/business", icon: Briefcase, soon: true },
   ]},
 ];
