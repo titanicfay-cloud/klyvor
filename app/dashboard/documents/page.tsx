@@ -4,16 +4,23 @@ import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Search, FileText, MoreHorizontal, Trash2, Copy, ArrowLeft, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Plus, Search, FileText, MoreHorizontal, Trash2, Copy, ArrowLeft, CheckCircle2, Loader2, AlertCircle, FolderKanban } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { formatDate } from "@/lib/utils"; // Import the helper
+import { formatDate } from "@/lib/utils";
 
 interface Document {
   id: string;
   title: string;
   content: string;
+  project_id: string | null;
   updated_at: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
 }
 
 type SaveStatus = "saved" | "saving" | "unsaved" | "error";
@@ -22,12 +29,12 @@ export default function DocumentsPage() {
   const supabase = createClient();
   
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [activeDoc, setActiveDoc] = useState<Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   
-  // User Preferences
   const [timezone, setTimezone] = useState("UTC");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
   
@@ -45,19 +52,16 @@ export default function DocumentsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch Preferences
     const { data: prefs } = await supabase.from("user_preferences").select("timezone, date_format").single();
     if (prefs) {
       setTimezone(prefs.timezone || "UTC");
       setDateFormat(prefs.date_format || "DD/MM/YYYY");
     }
 
-    // Fetch Documents
-    const { data, error } = await supabase
-      .from("documents")
-      .select("*")
-      .order("updated_at", { ascending: false });
+    const { data: projData } = await supabase.from("projects").select("id, name").order("name");
+    setProjects(projData || []);
 
+    const { data, error } = await supabase.from("documents").select("*").order("updated_at", { ascending: false });
     if (error) toast.error("LOAD ERROR: " + error.message);
     else {
       setDocuments(data || []);
@@ -81,7 +85,7 @@ export default function DocumentsPage() {
 
       const { error } = await supabase
         .from("documents")
-        .update({ title: latestDoc.title, content: latestDoc.content, updated_at: new Date().toISOString() })
+        .update({ title: latestDoc.title, content: latestDoc.content, project_id: latestDoc.project_id, updated_at: new Date().toISOString() })
         .eq("id", latestDoc.id);
 
       if (error) {
@@ -132,7 +136,7 @@ export default function DocumentsPage() {
 
     const { data, error } = await supabase
       .from("documents")
-      .insert([{ user_id: user.id, title: `${doc.title} (Copy)`, content: doc.content }])
+      .insert([{ user_id: user.id, title: `${doc.title} (Copy)`, content: doc.content, project_id: doc.project_id }])
       .select()
       .single();
 
@@ -141,6 +145,13 @@ export default function DocumentsPage() {
       setDocuments([data, ...documents]);
       toast.success("Document duplicated.");
     }
+  };
+
+  const handleLinkProject = (projectId: string) => {
+    if (!activeDoc) return;
+    const updatedDoc = { ...activeDoc, project_id: projectId === "none" ? null : projectId };
+    setActiveDoc(updatedDoc);
+    triggerAutosave(updatedDoc);
   };
 
   const filteredDocs = documents.filter(d => 
@@ -179,8 +190,10 @@ export default function DocumentsPage() {
                     </DropdownMenu>
                   </div>
                   <p className="text-xs text-[#64748B] truncate mb-2">{doc.content || "Empty document..."}</p>
-                  {/* FIXED: Applied timezone and date format to the edited date */}
-                  <p className="text-[10px] text-[#64748B]">Edited {formatDate(doc.updated_at, timezone, dateFormat)}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-[#64748B]">Edited {formatDate(doc.updated_at, timezone, dateFormat)}</p>
+                    {doc.project_id && <span className="text-[10px] text-[#7C5CFC] flex items-center gap-1"><FolderKanban size={10} /> Project</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -191,7 +204,7 @@ export default function DocumentsPage() {
       <div className={`flex-1 flex-col bg-[#0B1020] border border-[#27344B] rounded-xl overflow-hidden relative ${!isMobileEditorOpen ? 'hidden md:flex' : 'flex'}`}>
         {activeDoc ? (
           <>
-            <div className="h-14 border-b border-[#27344B] flex items-center justify-between px-4 sm:px-6 bg-[#111A2E]/50">
+            <div className="h-16 border-b border-[#27344B] flex items-center justify-between px-4 sm:px-6 bg-[#111A2E]/50">
               <div className="flex items-center gap-3">
                 <button onClick={() => setIsMobileEditorOpen(false)} className="md:hidden text-[#C7D0E0] hover:text-white"><ArrowLeft size={20} /></button>
                 <div className="flex items-center gap-1.5 text-xs font-medium">
@@ -200,6 +213,19 @@ export default function DocumentsPage() {
                   {saveStatus === "unsaved" && <><div className="w-2 h-2 rounded-full bg-[#F59E0B]" /><span className="text-[#F59E0B]">Unsaved changes</span></>}
                   {saveStatus === "error" && <><AlertCircle size={14} className="text-[#EF4444]" /><span className="text-[#EF4444]">Couldn't save</span></>}
                 </div>
+              </div>
+              
+              {/* Project Linker Dropdown */}
+              <div className="flex items-center gap-2">
+                <Select value={activeDoc.project_id || "none"} onValueChange={(val) => handleLinkProject(val as string)}>
+                  <SelectTrigger className="w-[180px] h-8 bg-[#0B1020] border-[#27344B] text-[#C7D0E0] text-xs">
+                    <SelectValue placeholder="Link to Project" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
+                    <SelectItem value="none">No Project</SelectItem>
+                    {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
