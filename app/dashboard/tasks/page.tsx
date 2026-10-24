@@ -288,8 +288,15 @@ export default function TasksPage() {
             
             <div className="space-y-2">
               <Label>Project (Optional)</Label>
+              {/* FIXED: Added explicit children to SelectValue */}
               <Select value={projectId} onValueChange={(val) => setProjectId(val as string)}>
-                <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue placeholder="Assign to a project..." /></SelectTrigger>
+                <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
+                  <SelectValue placeholder="Assign to a project...">
+                    {projectId === "none" || !projectId 
+                      ? "No Project (Standalone)" 
+                      : projects.find(p => p.id === projectId)?.name || "Select a project"}
+                  </SelectValue>
+                </SelectTrigger>
                 <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
                   <SelectItem value="none">No Project (Standalone)</SelectItem>
                   {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
