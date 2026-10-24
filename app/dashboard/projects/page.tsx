@@ -20,6 +20,7 @@ interface Project {
   description: string | null;
   status: string;
   priority: string;
+  category: string | null;
   target_date: string | null;
 }
 
@@ -41,6 +42,8 @@ export default function ProjectsPage() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("planning");
   const [priority, setPriority] = useState("medium");
+  const [category, setCategory] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [targetDate, setTargetDate] = useState("");
 
   const fetchData = async () => {
@@ -76,6 +79,8 @@ export default function ProjectsPage() {
       description,
       status,
       priority,
+      category: category || null,
+      start_date: startDate || null,
       target_date: targetDate || null
     }]);
 
@@ -83,7 +88,7 @@ export default function ProjectsPage() {
     else {
       toast.success("Project created successfully.");
       setIsModalOpen(false);
-      setName(""); setDescription(""); setTargetDate("");
+      setName(""); setDescription(""); setTargetDate(""); setStartDate(""); setCategory("");
       fetchData();
     }
     setIsSubmitting(false);
@@ -136,10 +141,15 @@ export default function ProjectsPage() {
           filteredProjects.map(project => (
             <Link key={project.id} href={`/dashboard/projects/${project.id}`} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all group flex flex-col h-full">
               <div className="flex justify-between items-start mb-4">
-                <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${getStatusColor(project.status)}`}>{project.status.replace("_", " ")}</Badge>
-                <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${project.priority === 'urgent' ? 'text-[#EF4444] border-[#EF4444]' : project.priority === 'high' ? 'text-[#F59E0B] border-[#F59E0B]' : 'text-[#00D4FF] border-[#00D4FF]'}`}>{project.priority}</Badge>
+                <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${getStatusColor(project.status)}`}>
+                  {project.status === 'on_hold' ? 'On Hold' : project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                </Badge>
+                <Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${project.priority === 'urgent' ? 'text-[#EF4444] border-[#EF4444]' : project.priority === 'high' ? 'text-[#F59E0B] border-[#F59E0B]' : 'text-[#00D4FF] border-[#00D4FF]'}`}>
+                  {project.priority}
+                </Badge>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">{project.name}</h3>
+              <h3 className="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">{project.name}</h3>
+              {project.category && <span className="text-xs text-[#64748B] mb-3 block">{project.category}</span>}
               <p className="text-sm text-[#C7D0E0] line-clamp-3 mb-6 flex-grow">{project.description || "No description provided."}</p>
               
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#27344B]">
@@ -152,29 +162,79 @@ export default function ProjectsPage() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-[#0B1020] border-[#27344B] text-white sm:max-w-[500px]">
-          <DialogHeader><DialogTitle>Create a Project</DialogTitle><DialogDescription className="text-[#C7D0E0]">Start organising your work into a structured project.</DialogDescription></DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-4 py-4">
-            <div className="space-y-2"><Label>Project Name <span className="text-[#EF4444]">*</span></Label><Input value={name} onChange={e => setName(e.target.value)} required className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF]" /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={description} onChange={e => setDescription(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] resize-none h-24" /></div>
+        <DialogContent className="bg-[#0B1020] border-[#27344B] text-white sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Create a Project</DialogTitle>
+            <DialogDescription className="text-[#C7D0E0]">Set up the foundation for your next big initiative.</DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleCreate} className="space-y-5 py-4">
+            <div className="space-y-2">
+              <Label className="text-white">Project Name <span className="text-[#EF4444]">*</span></Label>
+              <Input value={name} onChange={e => setName(e.target.value)} required placeholder="e.g. Website Redesign or Q4 Marketing" className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11" />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Status</Label>
-                <Select value={status} onValueChange={(val) => setStatus(val as string)}>
-                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="planning">Planning</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="on_hold">On Hold</SelectItem></SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <Label className="text-white">Category</Label>
+                <Input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Client Work" className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11" />
               </div>
-              <div className="space-y-2"><Label>Priority</Label>
+              <div className="space-y-2">
+                <Label className="text-white">Priority</Label>
                 <Select value={priority} onValueChange={(val) => setPriority(val as string)}>
-                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="low">Low</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="high">High</SelectItem><SelectItem value="urgent">Urgent</SelectItem></SelectContent>
+                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white h-11">
+                    <SelectValue>
+                      {priority === 'low' ? 'Low' : priority === 'medium' ? 'Medium' : priority === 'high' ? 'High' : 'Urgent'}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="space-y-2"><Label>Target Completion Date</Label><Input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] [color-scheme:dark]" /></div>
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-[#C7D0E0] hover:text-white">Cancel</Button>
-              <Button type="submit" disabled={isSubmitting || !name.trim()} className="bg-klyvor-gradient text-white">{isSubmitting ? "Creating..." : "Create Project"}</Button>
+
+            <div className="space-y-2">
+              <Label className="text-white">Description</Label>
+              <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="What is this project about?" className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] resize-none h-24" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-white">Start Date</Label>
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11 [color-scheme:dark]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-white">Target Completion</Label>
+                <Input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11 [color-scheme:dark]" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white">Current Status</Label>
+              <Select value={status} onValueChange={(val) => setStatus(val as string)}>
+                <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white h-11">
+                  <SelectValue>
+                    {status === 'planning' ? 'Planning' : status === 'active' ? 'Active' : status === 'on_hold' ? 'On Hold' : 'Completed'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
+                  <SelectItem value="planning">Planning</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="on_hold">On Hold</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <DialogFooter className="pt-4 border-t border-[#27344B]">
+              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)} className="text-[#C7D0E0] hover:text-white h-11">Cancel</Button>
+              <Button type="submit" disabled={isSubmitting || !name.trim()} className="bg-klyvor-gradient text-white h-11 px-8">
+                {isSubmitting ? "Creating..." : "Create Project"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
