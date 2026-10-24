@@ -17,25 +17,30 @@ interface ComingSoonProps {
 export default function ComingSoon({ title, subtitle, icon, features, accentColor = "#00D4FF" }: ComingSoonProps) {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true); // Added to prevent UI flash
   const [hasJoined, setHasJoined] = useState(false);
 
-  // Check if the user is already on the waitlist for this feature
   useEffect(() => {
     const checkStatus = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setIsChecking(false);
+        return;
+      }
 
-      const { data } = await supabase
+      // FIXED: Using maybeSingle() instead of single() to handle 0 rows gracefully
+      const { data, error } = await supabase
         .from("feature_waitlist")
         .select("id")
         .eq("user_id", user.id)
         .eq("feature_name", title)
-        .single();
+        .maybeSingle();
 
       if (data) setHasJoined(true);
+      setIsChecking(false);
     };
     checkStatus();
-  }, [title, supabase]);
+  }, [title]); // Removed supabase from dependency array to prevent re-fetching
 
   const handleNotify = async () => {
     if (hasJoined) return;
@@ -99,19 +104,25 @@ export default function ComingSoon({ title, subtitle, icon, features, accentColo
         ))}
       </div>
 
-      <Button 
-        onClick={handleNotify} 
-        disabled={loading || hasJoined}
-        className={`px-8 py-6 rounded-full font-bold text-base transition-all ${
-          hasJoined 
-            ? "bg-success/20 text-success border border-success/30 cursor-not-allowed hover:bg-success/20" 
-            : "bg-white text-[#0B1020] hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-        }`}
-      >
-        {loading ? <><Loader2 size={18} className="mr-2 animate-spin" /> Joining...</> 
-         : hasJoined ? <><CheckCircle2 size={18} className="mr-2" /> You're on the list</> 
-         : "Notify Me When It Launches"}
-      </Button>
+      {isChecking ? (
+         <Button disabled className="px-8 py-6 rounded-full font-bold text-base bg-[#111A2E] text-[#64748B] border border-[#27344B]">
+           <Loader2 size={18} className="mr-2 animate-spin" /> Checking status...
+         </Button>
+      ) : (
+        <Button 
+          onClick={handleNotify} 
+          disabled={loading || hasJoined}
+          className={`px-8 py-6 rounded-full font-bold text-base transition-all ${
+            hasJoined 
+              ? "bg-success/20 text-success border border-success/30 cursor-not-allowed hover:bg-success/20" 
+              : "bg-white text-[#0B1020] hover:bg-gray-200 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          }`}
+        >
+          {loading ? <><Loader2 size={18} className="mr-2 animate-spin" /> Joining...</> 
+           : hasJoined ? <><CheckCircle2 size={18} className="mr-2" /> You're on the list</> 
+           : "Notify Me When It Launches"}
+        </Button>
+      )}
     </div>
   );
 }
