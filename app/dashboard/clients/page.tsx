@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Plus, Search, Users, Building2, User, Mail, Phone, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { formatDate } from "@/lib/utils";
 
 interface Client {
   id: string;
@@ -124,7 +123,9 @@ export default function ClientsPage() {
         <div className="flex gap-3">
           <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as string)}>
             <SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10">
-              <SelectValue placeholder="Status">{statusFilter === "all" ? "All Statuses" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}</SelectValue>
+              <SelectValue placeholder="Status">
+                {statusFilter === "all" ? "All Statuses" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
               <SelectItem value="all">All Statuses</SelectItem>
@@ -193,10 +194,17 @@ export default function ClientsPage() {
             </div>
 
             <div className="space-y-2"><Label>Status</Label>
+              {/* FIXED: Added explicit children to SelectValue */}
               <Select value={status} onValueChange={(val) => setStatus(val as string)}>
-                <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white">
+                  <SelectValue>
+                    {status === "prospect" ? "Prospect" : status === "active" ? "Active" : "Inactive"}
+                  </SelectValue>
+                </SelectTrigger>
                 <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
-                  <SelectItem value="prospect">Prospect</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="prospect">Prospect</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
