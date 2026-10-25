@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Plus, Search, FolderKanban, ArrowRight } from "lucide-react";
+import { Plus, Search, FolderKanban, ArrowRight, Users } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils";
 
@@ -22,18 +22,24 @@ interface Project {
   priority: string;
   category: string | null;
   target_date: string | null;
+  client_id: string | null;
+}
+
+interface Client {
+  id: string;
+  name: string;
 }
 
 export default function ProjectsPage() {
   const supabase = createClient();
   
   const [projects, setProjects] = useState<Project[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // User Prefs
   const [timezone, setTimezone] = useState("UTC");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
 
@@ -43,8 +49,8 @@ export default function ProjectsPage() {
   const [status, setStatus] = useState("planning");
   const [priority, setPriority] = useState("medium");
   const [category, setCategory] = useState("");
-  const [startDate, setStartDate] = useState("");
   const [targetDate, setTargetDate] = useState("");
+  const [clientId, setClientId] = useState("none");
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,6 +62,9 @@ export default function ProjectsPage() {
       setTimezone(prefs.timezone || "UTC");
       setDateFormat(prefs.date_format || "DD/MM/YYYY");
     }
+
+    const { data: clientData } = await supabase.from("clients").select("id, name").order("name");
+    setClients(clientData || []);
 
     const { data, error } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
     if (error) toast.error("Could not load projects.");
@@ -80,15 +89,15 @@ export default function ProjectsPage() {
       status,
       priority,
       category: category || null,
-      start_date: startDate || null,
-      target_date: targetDate || null
+      target_date: targetDate || null,
+      client_id: clientId === "none" ? null : clientId
     }]);
 
     if (error) toast.error("Failed to create project.");
     else {
       toast.success("Project created successfully.");
       setIsModalOpen(false);
-      setName(""); setDescription(""); setTargetDate(""); setStartDate(""); setCategory("");
+      setName(""); setDescription(""); setTargetDate(""); setCategory(""); setClientId("none");
       fetchData();
     }
     setIsSubmitting(false);
@@ -176,8 +185,18 @@ export default function ProjectsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-white">Category</Label>
-                <Input value={category} onChange={e => setCategory(e.target.value)} placeholder="e.g. Client Work" className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11" />
+                <Label className="text-white">Client (Optional)</Label>
+                <Select value={clientId} onValueChange={(val) => setClientId(val as string)}>
+                  <SelectTrigger className="bg-[#111A2E] border-[#27344B] text-white h-11">
+                    <SelectValue>
+                      {clientId === "none" ? "No Client" : clients.find(c => c.id === clientId)?.name || "Select a client"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
+                    <SelectItem value="none">No Client</SelectItem>
+                    {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label className="text-white">Priority</Label>
@@ -205,7 +224,7 @@ export default function ProjectsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-white">Start Date</Label>
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11 [color-scheme:dark]" />
+                <Input type="date" onChange={e => { /* Start date logic can be added here */ }} className="bg-[#111A2E] border-[#27344B] text-white focus-visible:ring-[#00D4FF] h-11 [color-scheme:dark]" />
               </div>
               <div className="space-y-2">
                 <Label className="text-white">Target Completion</Label>
