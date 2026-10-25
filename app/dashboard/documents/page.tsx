@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import TiptapEditor from "@/components/dashboard/TiptapEditor";
+import DocumentAttachments from "@/components/dashboard/DocumentAttachments";
 
 interface Document {
   id: string;
@@ -221,8 +222,6 @@ export default function DocumentsPage() {
       <div className={`w-full md:w-80 flex-col bg-[#111A2E] border border-[#27344B] rounded-xl overflow-hidden shrink-0 ${isMobileEditorOpen ? 'hidden md:flex' : 'flex'}`}>
         
         <div className="p-4 border-b border-[#27344B]">
-          
-          {/* FIXED: Replaced asChild with direct styling on the trigger */}
           <DropdownMenu>
             <DropdownMenuTrigger className="w-full bg-klyvor-gradient text-white hover:opacity-90 font-semibold h-10 mb-4 flex items-center justify-between px-4 rounded-md outline-none transition-opacity">
               <span className="flex items-center gap-2"><Plus size={16} /> Create New</span>
@@ -344,11 +343,14 @@ export default function DocumentsPage() {
                     className="flex-1 w-full bg-transparent border-none outline-none resize-none text-[#C7D0E0] text-lg leading-relaxed placeholder:text-[#27344B]" 
                   />
                 ) : (
-                  <div className="flex-1 rounded-xl">
+                  <div className="flex-1 flex flex-col rounded-xl">
                      <TiptapEditor 
                        content={activeDoc.content_json || ""} 
                        onChange={handleRichDocChange} 
                      />
+                     
+                     {/* Render Attachments for Rich Documents Only */}
+                     <DocumentAttachments documentId={activeDoc.id} />
                   </div>
                 )}
 
