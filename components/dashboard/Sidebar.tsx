@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Briefcase, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Briefcase, Settings, LogOut, Users } from "lucide-react";
 
 type NavItem = { label: string; href: string; icon: any; soon?: boolean };
 type NavGroup = { title: string; items: NavItem[] };
@@ -21,7 +21,7 @@ const navItems: NavGroup[] = [
   ]},
   { title: "EXPLORE", items: [
       { label: "Project Planner", href: "/dashboard/projects", icon: Calendar },
-      { label: "Business Tools", href: "/dashboard/business", icon: Briefcase, soon: true },
+      { label: "Clients", href: "/dashboard/clients", icon: Users },
   ]},
 ];
 
