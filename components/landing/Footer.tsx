@@ -24,8 +24,9 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Company</h3>
             <ul className="space-y-3">
-              <li><Link href="/#platform" className="text-muted-foreground hover:text-primary text-sm transition-colors">About KLYVOR</Link></li>
-              <li><Link href="/#how-it-works" className="text-muted-foreground hover:text-primary text-sm transition-colors">How It Works</Link></li>
+              <li><Link href="/about" className="text-muted-foreground hover:text-primary text-sm transition-colors">About KLYVOR</Link></li>
+              <li><Link href="/how-it-works" className="text-muted-foreground hover:text-primary text-sm transition-colors">How It Works</Link></li>
+              <li><Link href="/pricing" className="text-muted-foreground hover:text-primary text-sm transition-colors">Pricing</Link></li>
             </ul>
           </div>
           <div>

@@ -10,10 +10,9 @@ export default function Navbar() {
             <Image src="/logo.png" alt="KLYVOR" width={220} height={70} className="object-contain w-auto h-16 md:h-20" priority />
           </Link>
           <nav className="hidden md:flex space-x-8">
-            <Link href="#platform" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">Platform</Link>
-            <Link href="#solutions" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">Solutions</Link>
-            <Link href="#how-it-works" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">How It Works</Link>
-            <Link href="#pricing" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">Pricing</Link>
+            <Link href="/about" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">About</Link>
+            <Link href="/how-it-works" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">How It Works</Link>
+            <Link href="/pricing" className="text-muted-foreground hover:text-white transition-colors text-sm font-medium">Pricing</Link>
           </nav>
           <div className="flex items-center space-x-4">
             <Link href="/login" className="hidden sm:block text-muted-foreground hover:text-white transition-colors text-sm font-medium">Sign In</Link>
