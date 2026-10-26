@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="min-h-screen bg-[#050812] text-white flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#0B1020] text-white flex flex-col lg:flex-row">
       
       {/* MOBILE TOP BAR */}
       <div className="lg:hidden h-16 border-b border-[#27344B] bg-[#0B1020] flex items-center justify-between px-4 sticky top-0 z-50">
