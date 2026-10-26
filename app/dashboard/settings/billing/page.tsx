@@ -3,23 +3,25 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PLAN_CONFIG, PlanId } from "@/lib/plans";
+import { initializePaystackCheckout } from "@/app/actions/paystack";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck, Zap, Building2, Briefcase, GraduationCap } from "lucide-react";
 import Link from "next/link";
 
 const PLANS = [
-  { id: "free", name: "Free", price: "$0", icon: GraduationCap, color: "text-[#64748B]", features: ["3 Projects", "3 Clients", "10 Documents", "Basic Notes"] },
-  { id: "productivity", name: "Productivity", price: "$19", icon: Zap, color: "text-[#F59E0B]", features: ["Unlimited Projects", "Unlimited Docs", "Rich Text Editor", "500MB Storage"] },
-  { id: "professional", name: "Professional", price: "$39", icon: Briefcase, color: "text-[#00D4FF]", features: ["Everything in Productivity", "20 Clients", "2GB Storage", "Advanced Note Types"] },
-  { id: "business", name: "Business", price: "$69", icon: Building2, color: "text-[#7C5CFC]", features: ["Everything in Professional", "Unlimited Clients", "5GB Storage", "Client CRM"] },
-  { id: "all_access", name: "All-Access", price: "$99", icon: ShieldCheck, color: "text-[#22C55E]", features: ["Everything in Business", "10GB Storage", "Priority Support", "Future AI Tools"] },
+  { id: "free", name: "Free", price: 0, icon: GraduationCap, color: "text-[#64748B]", features: ["3 Projects", "3 Clients", "10 Documents", "Basic Notes"] },
+  { id: "productivity", name: "Productivity", price: 19, icon: Zap, color: "text-[#F59E0B]", features: ["Unlimited Projects", "Unlimited Docs", "Rich Text Editor", "500MB Storage"] },
+  { id: "professional", name: "Professional", price: 39, icon: Briefcase, color: "text-[#00D4FF]", features: ["Everything in Productivity", "20 Clients", "2GB Storage", "Advanced Note Types"] },
+  { id: "business", name: "Business", price: 69, icon: Building2, color: "text-[#7C5CFC]", features: ["Everything in Professional", "Unlimited Clients", "5GB Storage", "Client CRM"] },
+  { id: "all_access", name: "All-Access", price: 99, icon: ShieldCheck, color: "text-[#22C55E]", features: ["Everything in Business", "10GB Storage", "Priority Support", "Future AI Tools"] },
 ];
 
 export default function BillingPage() {
   const supabase = createClient();
   
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const [usage, setUsage] = useState({ projects: 0, clients: 0, documents: 0 });
 
@@ -29,8 +31,7 @@ export default function BillingPage() {
       if (!user) return;
 
       const { data: sub } = await supabase.from("user_subscriptions").select("plan_id").eq("user_id", user.id).single();
-      const planId = sub?.plan_id || "free";
-      setCurrentPlan(planId);
+      setCurrentPlan(sub?.plan_id || "free");
 
       const [projRes, clientRes, docRes] = await Promise.all([
         supabase.from("projects").select("*", { count: "exact", head: true }).eq("user_id", user.id),
@@ -48,6 +49,18 @@ export default function BillingPage() {
     };
     fetchData();
   }, [supabase]);
+
+  const handleUpgrade = async (planId: string, price: number) => {
+    setCheckoutLoading(planId);
+    const result = await initializePaystackCheckout(planId, price);
+    
+    if (result.error) {
+      toast.error(result.error);
+      setCheckoutLoading(null);
+    } else if (result.url) {
+      window.location.href = result.url; // Redirect to Paystack
+    }
+  };
 
   if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading billing info...</div>;
 
@@ -114,11 +127,11 @@ export default function BillingPage() {
       <div>
         <h2 className="text-2xl font-bold text-white mb-6">Available Upgrades</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PLANS.filter(p => p.id !== currentPlan).map((plan) => (
+          {PLANS.filter(p => p.id !== currentPlan && p.id !== "free").map((plan) => (
             <div key={plan.id} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-2xl flex flex-col hover:border-primary/50 transition-colors">
               <div className="flex justify-between items-start mb-4">
                 <plan.icon className={`w-8 h-8 ${plan.color}`} />
-                <span className="text-2xl font-bold text-white">{plan.price}<span className="text-sm text-[#64748B] font-normal">/mo</span></span>
+                <span className="text-2xl font-bold text-white">${plan.price}<span className="text-sm text-[#64748B] font-normal">/mo</span></span>
               </div>
               <h3 className="text-xl font-bold text-white mb-4">{plan.name}</h3>
               <ul className="space-y-3 mb-8 flex-grow">
@@ -128,7 +141,13 @@ export default function BillingPage() {
                   </li>
                 ))}
               </ul>
-              <Button onClick={() => toast.info("Paystack checkout integration is coming next!")} className="w-full bg-white text-[#0B1020] hover:bg-gray-200 font-semibold">Upgrade to {plan.name}</Button>
+              <Button 
+                onClick={() => handleUpgrade(plan.id, plan.price)} 
+                disabled={checkoutLoading === plan.id}
+                className="w-full bg-white text-[#0B1020] hover:bg-gray-200 font-semibold"
+              >
+                {checkoutLoading === plan.id ? <><Loader2 size={16} className="mr-2 animate-spin" /> Redirecting...</> : `Upgrade to ${plan.name}`}
+              </Button>
             </div>
           ))}
         </div>
