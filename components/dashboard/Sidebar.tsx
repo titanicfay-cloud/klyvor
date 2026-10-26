@@ -4,7 +4,8 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Briefcase, Settings, LogOut, Users } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Briefcase, Settings, LogOut, Users, ShieldAlert } from "lucide-react";
+import { useState, useEffect } from "react";
 
 type NavItem = { label: string; href: string; icon: any; soon?: boolean };
 type NavGroup = { title: string; items: NavItem[] };
@@ -29,12 +30,26 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).single();
+        if (data) setRole(data.role);
+      }
+    };
+    fetchRole();
+  }, [supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   };
+
+  const isStaff = role === 'owner' || role === 'admin' || role === 'support';
 
   return (
     <aside className={`w-64 h-[100dvh] border-r border-[#27344B] bg-[#0B1020] flex-col fixed top-0 left-0 z-40 ${isMobile ? "flex" : "hidden lg:flex"}`}>
@@ -66,6 +81,19 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
             </ul>
           </div>
         ))}
+
+        {/* STAFF PORTAL LINK */}
+        {isStaff && (
+          <div>
+            <h4 className="text-xs font-semibold text-[#EF4444] tracking-wider uppercase mb-3 px-2 flex items-center gap-2">
+              <ShieldAlert size={12} /> Staff Access
+            </h4>
+            <Link href="/admin" onClick={onNavigate} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 hover:bg-[#EF4444]/20">
+              <LayoutDashboard size={18} />
+              Admin Portal
+            </Link>
+          </div>
+        )}
       </div>
       
       <div className="p-4 border-t border-[#27344B] shrink-0 space-y-1">
@@ -74,7 +102,6 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
           Settings
         </Link>
         
-        {/* NEW: Direct Sign Out Button */}
         <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-destructive/10 hover:text-destructive transition-colors border border-transparent text-left">
           <LogOut size={18} className="text-[#64748B]" />
           Sign Out
