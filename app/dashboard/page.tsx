@@ -66,9 +66,14 @@ export default async function DashboardOverview() {
           <Clock className="w-8 h-8 text-[#64748B] mx-auto mb-4" />
           <h3 className="text-white font-medium mb-2">Your workspace is just getting started.</h3>
           <p className="text-sm text-[#64748B] mb-6 max-w-md mx-auto">Tasks, documents, and saved calculations will appear here as you begin using KLYVOR.</p>
-          <Button asChild variant="outline" className="border-[#27344B] text-white hover:bg-[#111A2E]">
-             <Link href="/dashboard/directory">Explore your tools</Link>
-          </Button>
+          
+          {/* FIXED: Wrapped Button inside Link instead of using asChild */}
+          <Link href="/dashboard/directory">
+            <Button variant="outline" className="border-[#27344B] text-white hover:bg-[#111A2E]">
+              Explore your tools
+            </Button>
+          </Link>
+
         </div>
       </div>
 
