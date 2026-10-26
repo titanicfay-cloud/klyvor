@@ -156,14 +156,14 @@ export default async function DashboardOverview() {
             </div>
           </Link>
           
-          <Link href="/dashboard/business" className="bg-[#111A2E] border border-[#27344B] p-6 rounded-xl opacity-60 hover:opacity-100 transition-opacity flex items-start gap-4">
+          <Link href="/dashboard/clients" className="bg-[#111A2E] border border-[#27344B] p-6 rounded-xl opacity-60 hover:opacity-100 transition-opacity flex items-start gap-4">
             <Briefcase className="text-secondary shrink-0" size={24} />
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-white font-semibold">Business Tools</h3>
                 <span className="text-[10px] font-bold bg-[#27344B] text-[#C7D0E0] px-2 py-0.5 rounded-full">COMING SOON</span>
               </div>
-              <p className="text-xs text-[#64748B]">Explore tools designed to support the practical side of professional work.</p>
+              <p className="text-xs text-[#64748B]">Manage your clients and keep your relationships organized.</p>
             </div>
           </Link>
         </div>
