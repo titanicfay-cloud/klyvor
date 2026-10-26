@@ -1,0 +1,21 @@
+{
+  "name": "KLYVOR | Professional Workspace",
+  "short_name": "KLYVOR",
+  "description": "A connected professional platform for organising work, managing information and moving forward with clarity.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0B1020",
+  "theme_color": "#0B1020",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
