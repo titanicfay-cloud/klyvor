@@ -4,10 +4,14 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PLAN_CONFIG, PlanId } from "@/lib/plans";
 import { initializePaystackCheckout } from "@/app/actions/paystack";
+import { cancelSubscriptionAction } from "@/app/actions/workspace";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck, Zap, Building2, Briefcase, GraduationCap } from "lucide-react";
 import Link from "next/link";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
+} from "@/components/ui/dialog";
 
 const PLANS = [
   { id: "free", name: "Free", price: 0, icon: GraduationCap, color: "text-[#64748B]", features: ["3 Projects", "3 Clients", "10 Documents", "Basic Notes"] },
@@ -22,31 +26,37 @@ export default function BillingPage() {
   
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string>("free");
   const [usage, setUsage] = useState({ projects: 0, clients: 0, documents: 0 });
 
+  const fetchData = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: sub } = await supabase.from("user_subscriptions").select("plan_id, status").eq("user_id", user.id).single();
+    // If status is canceled, force display to free
+    const planId = (sub?.status === "active" ? sub?.plan_id : "free") || "free";
+    setCurrentPlan(planId);
+
+    const [projRes, clientRes, docRes] = await Promise.all([
+      supabase.from("projects").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("documents").select("*", { count: "exact", head: true }).eq("user_id", user.id)
+    ]);
+
+    setUsage({
+      projects: projRes.count || 0,
+      clients: clientRes.count || 0,
+      documents: docRes.count || 0
+    });
+
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: sub } = await supabase.from("user_subscriptions").select("plan_id").eq("user_id", user.id).single();
-      setCurrentPlan(sub?.plan_id || "free");
-
-      const [projRes, clientRes, docRes] = await Promise.all([
-        supabase.from("projects").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("documents").select("*", { count: "exact", head: true }).eq("user_id", user.id)
-      ]);
-
-      setUsage({
-        projects: projRes.count || 0,
-        clients: clientRes.count || 0,
-        documents: docRes.count || 0
-      });
-
-      setLoading(false);
-    };
     fetchData();
   }, [supabase]);
 
@@ -58,8 +68,22 @@ export default function BillingPage() {
       toast.error(result.error);
       setCheckoutLoading(null);
     } else if (result.url) {
-      window.location.href = result.url; // Redirect to Paystack
+      window.location.href = result.url;
     }
+  };
+
+  const handleCancel = async () => {
+    setCancelLoading(true);
+    const result = await cancelSubscriptionAction();
+    
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Subscription canceled. You are now on the Free plan.");
+      setIsCancelModalOpen(false);
+      fetchData(); // Refresh the UI
+    }
+    setCancelLoading(false);
   };
 
   if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading billing info...</div>;
@@ -84,9 +108,18 @@ export default function BillingPage() {
               <activePlanData.icon className={`w-8 h-8 ${activePlanData.color}`} />
               <h2 className="text-2xl font-bold text-white">{activePlanData.name}</h2>
             </div>
-            <p className="text-sm text-[#C7D0E0]">You are currently on the {activePlanData.name} tier. Upgrade to unlock higher limits.</p>
+            <p className="text-sm text-[#C7D0E0]">You are currently on the {activePlanData.name} tier.</p>
           </div>
-          <Button disabled className="w-full mt-6 bg-[#0B1020] border border-[#27344B] text-[#64748B]">Current Active Plan</Button>
+          
+          {currentPlan !== "free" ? (
+            <Button onClick={() => setIsCancelModalOpen(true)} variant="outline" className="w-full mt-6 border-[#EF4444] text-[#EF4444] hover:bg-[#EF4444]/10">
+              Cancel Subscription
+            </Button>
+          ) : (
+            <Button disabled className="w-full mt-6 bg-[#0B1020] border border-[#27344B] text-[#64748B]">
+              Current Active Plan
+            </Button>
+          )}
         </div>
 
         <div className="bg-[#111A2E] border border-[#27344B] p-6 rounded-2xl md:col-span-2">
@@ -152,6 +185,24 @@ export default function BillingPage() {
           ))}
         </div>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
+        <DialogContent className="bg-[#0B1020] border-[#27344B] text-white sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Cancel Subscription?</DialogTitle>
+            <DialogDescription className="text-[#C7D0E0]">
+              Are you sure you want to cancel? You will immediately lose access to premium features and revert to the Free plan limits.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="pt-4">
+            <Button variant="ghost" onClick={() => setIsCancelModalOpen(false)} className="text-[#C7D0E0]">Keep Plan</Button>
+            <Button onClick={handleCancel} disabled={cancelLoading} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/90">
+              {cancelLoading ? "Canceling..." : "Yes, Cancel"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
