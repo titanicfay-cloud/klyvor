@@ -7,7 +7,7 @@ import { initializePaystackCheckout } from "@/app/actions/paystack";
 import { cancelSubscriptionAction } from "@/app/actions/workspace";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, ShieldCheck, Zap, Building2, Briefcase, GraduationCap } from "lucide-react";
+import { CheckCircle2, Loader2, ShieldCheck, Zap, Building2, Briefcase, GraduationCap, Crown, Users } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -19,6 +19,9 @@ const PLANS = [
   { id: "professional", name: "Professional", price: 39, icon: Briefcase, color: "text-[#00D4FF]", features: ["Everything in Productivity", "20 Clients", "2GB Storage", "Advanced Note Types"] },
   { id: "business", name: "Business", price: 69, icon: Building2, color: "text-[#7C5CFC]", features: ["Everything in Professional", "Unlimited Clients", "5GB Storage", "Client CRM"] },
   { id: "all_access", name: "All-Access", price: 99, icon: ShieldCheck, color: "text-[#22C55E]", features: ["Everything in Business", "10GB Storage", "Priority Support", "Future AI Tools"] },
+  // Added missing high-tier plans for Owner display
+  { id: "team", name: "Team", price: 149, icon: Users, color: "text-[#F97316]", features: ["Everything in All-Access", "Shared Workspaces", "Team Permissions", "50GB Storage"] },
+  { id: "business_plus", name: "Business Plus", price: 299, icon: Crown, color: "text-[#EAB308]", features: ["Everything in Team", "Advanced Organization Controls", "SSO", "100GB Storage"] },
 ];
 
 export default function BillingPage() {
@@ -88,6 +91,7 @@ export default function BillingPage() {
 
   if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading billing info...</div>;
 
+  // Find the active plan data, fallback to Free if not found (just in case)
   const activePlanData = PLANS.find(p => p.id === currentPlan) || PLANS[0];
   const limits = PLAN_CONFIG[currentPlan as PlanId] || PLAN_CONFIG['free'];
 
