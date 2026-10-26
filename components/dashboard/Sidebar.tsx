@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Briefcase, Settings, LogOut, Users, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert } from "lucide-react";
 import { useState, useEffect } from "react";
 
 type NavItem = { label: string; href: string; icon: any; soon?: boolean };
@@ -50,6 +50,7 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
   };
 
   const isStaff = role === 'owner' || role === 'admin' || role === 'support';
+  const staffLabel = role === 'owner' ? 'Owner Portal' : role === 'admin' ? 'Admin Portal' : 'Support Portal';
 
   return (
     <aside className={`w-64 h-[100dvh] border-r border-[#27344B] bg-[#0B1020] flex-col fixed top-0 left-0 z-40 ${isMobile ? "flex" : "hidden lg:flex"}`}>
@@ -82,7 +83,7 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
           </div>
         ))}
 
-        {/* STAFF PORTAL LINK */}
+        {/* DYNAMIC STAFF PORTAL LINK */}
         {isStaff && (
           <div>
             <h4 className="text-xs font-semibold text-[#EF4444] tracking-wider uppercase mb-3 px-2 flex items-center gap-2">
@@ -90,7 +91,7 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
             </h4>
             <Link href="/admin" onClick={onNavigate} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-colors bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 hover:bg-[#EF4444]/20">
               <LayoutDashboard size={18} />
-              Admin Portal
+              {staffLabel}
             </Link>
           </div>
         )}
