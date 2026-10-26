@@ -112,7 +112,7 @@ export default function SettingsPage() {
       <div className="bg-[#111A2E] border border-[#27344B] rounded-2xl p-6 sm:p-8">
         {activeTab === "profile" && (
           <div className="space-y-6 animate-in fade-in">
-            <div><h2 className="text-xl font-bold text-white mb-1">Your Profile</h2></div>
+            <div><h2 className="text-xl font-bold text-white mb-1">Your Profile</h2><p className="text-sm text-[#C7D0E0]">Keep your personal details up to date.</p></div>
             <div className="flex items-center gap-6 pb-6 border-b border-[#27344B]">
               <div className="w-20 h-20 rounded-full bg-[#0B1020] border border-[#27344B] flex items-center justify-center text-primary text-2xl font-bold">{fullName ? fullName.substring(0, 2).toUpperCase() : "KL"}</div>
               <div><p className="text-white font-semibold text-lg">{fullName || "Klyvor User"}</p><p className="text-sm text-[#64748B]">{user?.email}</p></div>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
 
         {activeTab === "security" && (
            <div className="space-y-8 animate-in fade-in">
-             <div><h2 className="text-xl font-bold text-white mb-1">Security</h2></div>
+             <div><h2 className="text-xl font-bold text-white mb-1">Security <div><h2 className="text-xl font-bold text-white mb-1">Security</h2></div> Authentication</h2><p className="text-sm text-[#C7D0E0]">Protect your account and control how you access KLYVOR.</p></div>
              <div className="space-y-4 max-w-md">
                <div className="flex items-center justify-between p-4 bg-[#0B1020] border border-[#27344B] rounded-xl">
                  <div><p className="text-white font-medium">Password</p><p className="text-xs text-[#64748B]">••••••••••••</p></div>
@@ -145,7 +145,7 @@ export default function SettingsPage() {
 
         {activeTab === "preferences" && (
           <div className="space-y-8 animate-in fade-in">
-            <div><h2 className="text-xl font-bold text-white mb-1">Preferences</h2></div>
+            <div><h2 className="text-xl font-bold text-white mb-1">Make It Yours</h2><p className="text-sm text-[#C7D0E0]">Configure your workspace to suit the way you work.</p></div>
             <div className="space-y-6 max-w-md">
               <div className="space-y-2"><Label>Time Zone</Label>
                 <Select value={timezone} onValueChange={(val) => setTimezone(val as string)}>
@@ -166,7 +166,7 @@ export default function SettingsPage() {
 
         {activeTab === "support" && (
           <div className="space-y-6 animate-in fade-in">
-            <div><h2 className="text-xl font-bold text-white mb-1">Support History</h2></div>
+            <div><h2 className="text-xl font-bold text-white mb-1">Support History</h2><p className="text-sm text-[#C7D0E0]">View the status of tickets you have submitted.</p></div>
             {tickets.length === 0 ? <p className="text-sm text-[#64748B]">You have not submitted any tickets yet.</p> : (
               <div className="space-y-4">
                 {tickets.map(t => (
@@ -182,7 +182,7 @@ export default function SettingsPage() {
 
         {activeTab === "data" && (
           <div className="space-y-8 animate-in fade-in">
-            <div><h2 className="text-xl font-bold text-white mb-1">Privacy</h2></div>
+            <div><h2 className="text-xl font-bold text-white mb-1">Your Data, Your Control</h2><p className="text-sm text-[#C7D0E0]">Understand how your information is stored and manage your account data.</p></div>
             <div className="space-y-6 max-w-md">
               <div className="mt-8 pt-8 border-t border-[#EF4444]/30">
                 <h3 className="text-[#EF4444] font-bold text-lg mb-2 flex items-center gap-2"><AlertTriangle size={20} /> Danger Zone</h3>
