@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: "KLYVOR | Beyond What's Possible",
   description: "A premium international professional operating platform.",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/app-icon.png",
+    apple: "/app-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
