@@ -172,6 +172,11 @@ export default function AdminSupportInbox() {
               </div>
 
               <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between items-center w-full">
+                <a href={`mailto:${selectedTicket.email}?subject=Re: ${selectedTicket.subject}`} className="w-full sm:w-auto">
+                  <Button variant="outline" className="border-[#00D4FF] text-[#00D4FF] hover:bg-[#00D4FF]/10 w-full sm:w-auto">
+                    <Mail size={16} className="mr-2" /> Reply via Email
+                  </Button>
+                </a>
                 <span className="text-xs text-[#64748B] w-full sm:w-auto text-left">
                   Submitted {new Date(selectedTicket.created_at).toLocaleString()}
                 </span>

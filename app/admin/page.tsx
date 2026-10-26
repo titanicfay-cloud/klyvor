@@ -17,7 +17,7 @@ export default async function AdminOverview() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <div className="flex items-center gap-3 mb-1.5">
-          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Admin Overview</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Owner & Admin Overview</h1>
           <span className="text-[10px] font-bold bg-primary/10 text-primary px-2.5 py-0.5 rounded-full uppercase tracking-widest border border-primary/20">
             {role?.role || "Staff"}
           </span>
