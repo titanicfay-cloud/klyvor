@@ -26,7 +26,7 @@ export default function PricingPage() {
         
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Simple, transparent pricing.</h1>
-          <p className="text-lg text-[#C7D0E0] mb-10">Start for free, then scale your workspace as you grow. No hidden fees.</p>
+          <p className="text-lg text-[#C7D0E0] mb-10">Start for free, then scale your workspace as you grow.</p>
           
           <div className="flex items-center justify-center gap-4">
             <span className={`text-sm font-medium ${!isAnnual ? 'text-white' : 'text-[#64748B]'}`}>Monthly</span>
@@ -37,22 +37,27 @@ export default function PricingPage() {
               <div className={`w-6 h-6 rounded-full bg-klyvor-gradient transition-transform ${isAnnual ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
             <span className={`text-sm font-medium ${isAnnual ? 'text-white' : 'text-[#64748B]'}`}>
-              Annually <span className="text-primary text-xs ml-1 font-bold">(Save 16%)</span>
+              Annually <span className="text-primary text-xs ml-1 font-bold">(Save 16.7% / 2 Months Free)</span>
             </span>
           </div>
         </div>
 
-        {/* Adjusted grid to hold 7 cards beautifully */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center">
           {PLANS.map((plan) => (
             <div key={plan.id} className="bg-[#111A2E] border border-[#27344B] p-6 rounded-2xl flex flex-col hover:border-primary/50 transition-colors">
               <plan.icon className={`w-8 h-8 mb-4 ${plan.color}`} />
               <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
               
-              <div className="flex items-baseline gap-1 mb-6">
+              <div className="flex items-baseline gap-1 mb-2">
                 <span className="text-4xl font-bold text-white">${isAnnual ? plan.annual : plan.price}</span>
                 <span className="text-sm text-[#64748B]">/{isAnnual ? 'yr' : 'mo'}</span>
               </div>
+              
+              {isAnnual && plan.price > 0 ? (
+                <p className="text-xs text-[#22C55E] mb-6">${(plan.annual / 12).toFixed(2)}/mo billed annually</p>
+              ) : (
+                <p className="text-xs text-[#64748B] mb-6">Billed monthly</p>
+              )}
 
               <ul className="space-y-3 mb-8 flex-grow">
                 {plan.features.map((feature, i) => (
@@ -70,7 +75,6 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
-
       </main>
       <Footer />
     </div>
