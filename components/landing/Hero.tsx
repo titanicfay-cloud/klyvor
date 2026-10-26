@@ -16,7 +16,8 @@ export default function Hero() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-6">
               <Link href="/signup" className="w-full sm:w-auto bg-klyvor-gradient text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:opacity-90 transition-opacity text-center">Get Started Free</Link>
-              <Link href="#platform" className="w-full sm:w-auto border border-border bg-card/50 text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-muted transition-colors text-center">Explore the Platform</Link>
+              {/* FIXED: Changed href from #platform to /about */}
+              <Link href="/about" className="w-full sm:w-auto border border-border bg-card/50 text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-muted transition-colors text-center">Explore the Platform</Link>
             </div>
             <p className="text-xs text-muted-foreground">Built for independent professionals, ambitious creators and growing businesses.</p>
           </div>
