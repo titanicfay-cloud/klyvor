@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { createClientAction } from "@/app/actions/workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,8 +66,8 @@ export default function ClientsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error } = await supabase.from("clients").insert([{
-      user_id: user.id,
+    const result = await createClientAction({
+      
       client_type: clientType,
       name,
       company_name: companyName || null,
@@ -74,9 +75,9 @@ export default function ClientsPage() {
       phone: phone || null,
       status,
       notes: notes || null
-    }]);
+    });
 
-    if (error) toast.error("Failed to create client.");
+    if (result.error) toast.error(result.error);
     else {
       toast.success("Client added successfully.");
       setIsModalOpen(false);

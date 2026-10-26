@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { createProjectAction } from "@/app/actions/workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,8 +83,8 @@ export default function ProjectsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error } = await supabase.from("projects").insert([{
-      user_id: user.id,
+    const result = await createProjectAction({
+      
       name,
       description,
       status,
@@ -91,9 +92,9 @@ export default function ProjectsPage() {
       category: category || null,
       target_date: targetDate || null,
       client_id: clientId === "none" ? null : clientId
-    }]);
+    });
 
-    if (error) toast.error("Failed to create project.");
+    if (result.error) toast.error(result.error);
     else {
       toast.success("Project created successfully.");
       setIsModalOpen(false);

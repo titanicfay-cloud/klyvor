@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { createDocumentAction } from "@/app/actions/workspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -131,16 +132,12 @@ export default function DocumentsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from("documents")
-      .insert([{ user_id: user.id, title: type === "quick_note" ? "New Note" : "New Document", document_type: type }])
-      .select()
-      .single();
+    const result = await createDocumentAction(type);
 
-    if (error) toast.error("Could not create.");
-    else {
-      setDocuments([data, ...documents]);
-      setActiveDoc(data);
+    if (result.error) toast.error(result.error);
+    else if (result.data) {
+      setDocuments([result.data, ...documents]);
+      setActiveDoc(result.data);
       setIsMobileEditorOpen(true);
       toast.success(type === "quick_note" ? "Note created." : "Document created.");
     }
