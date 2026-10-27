@@ -144,21 +144,51 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
-        {activeTab === "security" && ( <div className="p-6 space-y-6 animate-in fade-in"><h2 className="text-xl font-bold text-white">Security</h2><div className="flex items-center justify-between p-4 bg-[#0B1020] border border-[#27344B] rounded-xl"><div><p className="text-white">Password</p></div><Button variant="outline" onClick={() => setIsPasswordModalOpen(true)} className="border-[#27344B] text-white">Change</Button></div><Button onClick={handleSignOutAll} className="bg-[#0B1020] border border-[#EF4444] text-[#EF4444]">Sign Out All</Button></div> )}
+        
+        {activeTab === "security" && ( 
+          <div className="p-6 sm:p-8 space-y-6 animate-in fade-in">
+            {/* FIXED: Restored missing description */}
+            <div><h2 className="text-xl font-bold text-white mb-1">Security & Authentication</h2><p className="text-sm text-[#C7D0E0]">Protect your account and control how you access KLYVOR.</p></div>
+            <div className="flex items-center justify-between p-4 bg-[#0B1020] border border-[#27344B] rounded-xl max-w-md"><div><p className="text-white">Password</p><p className="text-xs text-[#64748B]">••••••••••••</p></div><Button variant="outline" onClick={() => setIsPasswordModalOpen(true)} className="border-[#27344B] text-white">Change</Button></div>
+            <div className="pt-4 border-t border-[#27344B] max-w-md"><h3 className="text-white font-semibold mb-2">Session Management</h3><Button onClick={handleSignOutAll} className="bg-[#0B1020] border border-[#EF4444] text-[#EF4444]">Sign Out All</Button></div>
+          </div> 
+        )}
+
         {activeTab === "preferences" && (
-          <div className="p-6 space-y-6 animate-in fade-in">
-            <h2 className="text-xl font-bold text-white mb-1">Make It Yours</h2><p className="text-sm text-[#C7D0E0]">Configure your workspace to suit the way you work.</p>
-            <div className="space-y-2"><Label>Time Zone</Label><Select value={timezone} onValueChange={(val) => setTimezone(val as string)}><SelectTrigger className="bg-[#0B1020] border-[#27344B] text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="UTC">UTC</SelectItem><SelectItem value="Africa/Lagos">Africa/Lagos (WAT)</SelectItem><SelectItem value="Europe/London">Europe/London (GMT)</SelectItem><SelectItem value="America/New_York">America/New_York (EST)</SelectItem><SelectItem value="Asia/Dubai">Asia/Dubai (GST)</SelectItem><SelectItem value="Asia/Singapore">Asia/Singapore (SGT)</SelectItem></SelectContent></Select></div>
-            <div className="pt-4 border-t border-[#27344B] space-y-4">
+          <div className="p-6 sm:p-8 space-y-6 animate-in fade-in">
+            {/* FIXED: Restored missing description */}
+            <div><h2 className="text-xl font-bold text-white mb-1">Make It Yours</h2><p className="text-sm text-[#C7D0E0]">Configure your workspace to suit the way you work.</p></div>
+            <div className="space-y-2 max-w-md"><Label>Time Zone</Label>
+              <Select value={timezone} onValueChange={(val) => setTimezone(val as string)}>
+                <SelectTrigger className="bg-[#0B1020] border-[#27344B] text-white w-full"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
+                  <SelectItem value="UTC">UTC</SelectItem><SelectItem value="Africa/Lagos">Africa/Lagos</SelectItem><SelectItem value="Europe/London">Europe/London</SelectItem><SelectItem value="America/New_York">America/New_York</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="pt-4 border-t border-[#27344B] space-y-4 max-w-md">
               <h3 className="text-white font-semibold">Notifications</h3>
               <div className="flex items-center justify-between"><span className="text-sm text-white">Product Updates</span><Switch checked={productUpdates} onCheckedChange={setProductUpdates} /></div>
               <div className="flex items-center justify-between"><span className="text-sm text-white">Tips & Guidance</span><Switch checked={tipsGuidance} onCheckedChange={setTipsGuidance} /></div>
             </div>
-            <Button onClick={handleSavePreferences} className="bg-klyvor-gradient text-white w-full">Save Preferences</Button>
+            <Button onClick={handleSavePreferences} className="bg-klyvor-gradient text-white w-full sm:w-auto">Save Preferences</Button>
           </div>
         )}
-        {activeTab === "support" && ( <div className="p-6 space-y-4 animate-in fade-in"><h2 className="text-xl font-bold text-white">Support History</h2>{tickets.length === 0 ? <p className="text-sm text-[#64748B]">No tickets.</p> : tickets.map(t => <div key={t.id} className="bg-[#0B1020] p-4 rounded-xl border border-[#27344B]"><h3 className="text-white">{t.subject}</h3><p className="text-sm text-[#C7D0E0]">{t.message}</p></div>)}</div> )}
-        {activeTab === "data" && ( <div className="p-6 space-y-4 animate-in fade-in"><h2 className="text-xl font-bold text-white">Privacy</h2><Button onClick={handleExportData} className="bg-white text-[#0B1020]"><Download className="mr-2" size={16}/> Export Data</Button></div> )}
+
+        {activeTab === "support" && ( 
+          <div className="p-6 sm:p-8 space-y-4 animate-in fade-in">
+            {/* FIXED: Restored missing description */}
+            <div><h2 className="text-xl font-bold text-white mb-1">Support History</h2><p className="text-sm text-[#C7D0E0]">View the status of tickets you have submitted.</p></div>
+            {tickets.length === 0 ? <p className="text-sm text-[#64748B]">No tickets.</p> : tickets.map(t => <div key={t.id} className="bg-[#0B1020] p-4 rounded-xl border border-[#27344B]"><h3 className="text-white">{t.subject}</h3><p className="text-sm text-[#C7D0E0]">{t.message}</p></div>)}</div> 
+        )}
+
+        {activeTab === "data" && ( 
+          <div className="p-6 sm:p-8 space-y-4 animate-in fade-in">
+            {/* FIXED: Restored missing description */}
+            <div><h2 className="text-xl font-bold text-white mb-1">Your Data, Your Control</h2><p className="text-sm text-[#C7D0E0]">Understand how your information is stored and manage your account data.</p></div>
+            <Button onClick={handleExportData} className="bg-white text-[#0B1020]"><Download className="mr-2" size={16}/> Export Data</Button>
+          </div> 
+        )}
       </div>
 
       <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}><DialogContent className="bg-[#0B1020] border-[#27344B] text-white"><DialogHeader><DialogTitle>Change Password</DialogTitle></DialogHeader><form onSubmit={handleChangePassword} className="space-y-4"><Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New Password" className="bg-[#111A2E] border-[#27344B] text-white" /><Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm Password" className="bg-[#111A2E] border-[#27344B] text-white" /><Button type="submit" className="w-full bg-klyvor-gradient text-white">Update</Button></form></DialogContent></Dialog>

@@ -71,7 +71,7 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
         <Link href="/dashboard/settings" onClick={onNavigate} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", pathname === "/dashboard/settings" ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
           <Settings size={18} className={pathname === "/dashboard/settings" ? "text-primary" : "text-[#64748B]"} />Settings
         </Link>
-        <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-destructive/10 hover:text-destructive transition-colors border border-transparent text-left"><LogOut size={18} className="text-[#64748B]" />Sign Out</button>
+        <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-[#2A1315] hover:text-[#EF4444] transition-colors border border-transparent text-left"><LogOut size={18} className="text-[#64748B]" />Sign Out</button>
       </div>
     </aside>
   );
