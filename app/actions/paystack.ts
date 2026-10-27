@@ -7,15 +7,22 @@ export async function initializePaystackCheckout(planId: string, priceUSD: numbe
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  // Convert USD to NGN for Paystack testing (Approximate rates)
-  const ngnRates: Record<number, number> = {
-    19: 3000000, // 30,000 NGN in kobo
-    39: 6000000, // 60,000 NGN in kobo
-    69: 10000000, // 100,000 NGN in kobo
-    99: 15000000, // 150,000 NGN in kobo
-  };
+  // 1. Default fallback rate (in case the API fails)
+  let exchangeRate = 1370;
 
-  const amountInKobo = ngnRates[priceUSD] || 3000000; // Default 30k NGN
+  // 2. Fetch live exchange rate (Free API, no key needed, cached for 1 hour)
+  try {
+    const rateRes = await fetch("https://open.er-api.com/v6/latest/USD", { next: { revalidate: 3600 } });
+    const rateData = await rateRes.json();
+    if (rateData && rateData.rates && rateData.rates.NGN) {
+      exchangeRate = rateData.rates.NGN;
+    }
+  } catch (error) {
+    console.warn("Failed to fetch live rate, using fallback:", exchangeRate);
+  }
+
+  // 3. Convert USD to NGN and then to Kobo (Paystack requires Kobo)
+  const amountInKobo = Math.round(priceUSD * exchangeRate * 100);
 
   try {
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
@@ -31,9 +38,8 @@ export async function initializePaystackCheckout(planId: string, priceUSD: numbe
         metadata: {
           user_id: user.id,
           plan_id: planId,
-          custom_fields: [
-            { display_name: "Plan", variable_name: "plan", value: planId }
-          ]
+          usd_price: priceUSD, // Optional: Save the original USD price for your records
+          exchange_rate_used: exchangeRate // Optional: Save the rate used
         },
       }),
     });
