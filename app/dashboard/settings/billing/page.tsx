@@ -114,7 +114,7 @@ export default function BillingPage() {
 
       <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
         <DialogContent className="bg-[#0B1020] border-[#27344B] text-white sm:max-w-[400px]">
-          <DialogHeader><DialogTitle>Cancel Subscription?</DialogTitle><DialogDescription className="text-[#C7D0E0]">You will immediately lose access to premium features and revert to the Free plan limits.</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle>Cancel Subscription?</DialogTitle><DialogDescription className="text-[#C7D0E0]">You will immediately lose access to premium features and revert to the Free plan limits. If you exceed the Free plan limits, your data will not be deleted, but you will not be able to create new items until you upgrade again.</DialogDescription></DialogHeader>
           <DialogFooter className="pt-4"><Button variant="ghost" onClick={() => setIsCancelModalOpen(false)} className="text-[#C7D0E0]">Keep Plan</Button><Button onClick={handleCancel} disabled={cancelLoading} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/90">{cancelLoading ? "Canceling..." : "Yes, Cancel"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
