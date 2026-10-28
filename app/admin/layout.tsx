@@ -10,9 +10,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [roleName, setRoleName] = useState("STAFF");
-  const supabase = createClient();
-
+  
+  // FIXED: Moved Supabase client initialization inside useEffect
   useEffect(() => {
+    const supabase = createClient();
     const fetchRole = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -21,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }
     };
     fetchRole();
-  }, [supabase]);
+  }, []);
 
   const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
     <>

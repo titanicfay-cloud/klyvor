@@ -2,14 +2,16 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
-// We use the Supabase Service Role Key here because the webhook is not authenticated as a user.
-// It needs permission to update the user's subscription directly.
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // You will need to add this to your .env
-);
+// Forces Next.js not to try and pre-render this route during build
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  // Moved client initialization INSIDE the function to prevent build errors
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
   try {
     const body = await req.text();
     const hash = crypto.createHmac("sha512", process.env.PAYSTACK_SECRET_KEY!).update(body).digest("hex");
@@ -21,12 +23,11 @@ export async function POST(req: Request) {
 
     const event = JSON.parse(body);
 
-    // Check if the event is a successful charge
     if (event.event === "charge.success") {
       const { metadata, customer } = event.data;
       const { user_id, plan_id } = metadata;
 
-      // Check for idempotency (prevent processing the same event twice)
+      // Check for idempotency
       const { data: existingEvent } = await supabaseAdmin
         .from("webhook_events")
         .select("id")
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
         status: "active",
         provider_customer_id: customer.customer_code,
         provider_subscription_id: event.data.reference,
-        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       }, { onConflict: "user_id" });
     }
 

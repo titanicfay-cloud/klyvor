@@ -9,7 +9,8 @@ import { useState, useEffect } from "react";
 
 const navItems = [
   { title: "WORKSPACE", items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard }, { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid }]},
-  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
+  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
+      { label: "Calendar", href: "/dashboard/calendar", icon: Calendar }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
   { title: "EXPLORE", items: [{ label: "Project Planner", href: "/dashboard/projects", icon: Calendar }, { label: "Clients", href: "/dashboard/clients", icon: Users }]},
 ];
 
