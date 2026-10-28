@@ -5,35 +5,24 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert } from "lucide-react";
-import { useState, useEffect } from "react";
 
-const navItems = [
+type NavItem = { label: string; href: string; icon: any; };
+type NavGroup = { title: string; items: NavItem[]; };
+
+const navItems: NavGroup[] = [
   { title: "WORKSPACE", items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard }, { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid }]},
-  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
-      { label: "Calendar", href: "/dashboard/calendar", icon: Calendar }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
+  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare }, { label: "Calendar", href: "/dashboard/calendar", icon: Calendar }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
   { title: "EXPLORE", items: [{ label: "Project Planner", href: "/dashboard/projects", icon: Calendar }, { label: "Clients", href: "/dashboard/clients", icon: Users }]},
 ];
 
-export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: boolean, onNavigate?: () => void }) {
+export default function Sidebar({ isMobile = false, onNavigate, role }: { isMobile?: boolean, onNavigate?: () => void, role: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const [role, setRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).single();
-        if (data) setRole(data.role);
-      }
-    };
-    fetchRole();
-  }, [supabase]);
-
-  const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/login"); router.refresh(); };
   const isStaff = role === 'owner' || role === 'admin' || role === 'support';
   const staffLabel = role === 'owner' ? 'Owner Portal' : role === 'admin' ? 'Admin Portal' : 'Support Portal';
+
+  const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/login"); router.refresh(); };
 
   return (
     <aside className={`w-64 h-[100dvh] border-r border-[#27344B] bg-[#0B1020] flex-col fixed top-0 left-0 z-40 ${isMobile ? "flex" : "hidden lg:flex"}`}>
@@ -50,7 +39,6 @@ export default function Sidebar({ isMobile = false, onNavigate }: { isMobile?: b
                 const isActive = pathname === item.href;
                 return (
                   <li key={item.label}>
-                    {/* FIXED: Removed any destructive colors, strictly using primary/navy */}
                     <Link href={item.href} onClick={onNavigate} className={cn("flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", isActive ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
                       <div className="flex items-center gap-3"><item.icon size={18} className={isActive ? "text-primary" : "text-[#64748B]"} />{item.label}</div>
                     </Link>

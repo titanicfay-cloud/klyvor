@@ -1,18 +1,16 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, LogOut, Settings } from "lucide-react";
+import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
-import { useEffect, useState } from "react";
+import UserDropdown from "./UserDropdown";
+import { useState, useEffect } from "react";
 
 const getBreadcrumb = (path: string) => {
   if (path === "/dashboard") return "Workspace / Overview";
   if (path.includes("directory")) return "Workspace / Tool Directory";
   if (path.includes("tasks")) return "Workspace / Tasks";
+  if (path.includes("calendar")) return "Workspace / Calendar";
   if (path.includes("documents")) return "Workspace / Documents & Notes";
   if (path.includes("calculator")) return "Workspace / Pricing Calculator";
   if (path.includes("projects")) return "Workspace / Project Planner";
@@ -21,18 +19,11 @@ const getBreadcrumb = (path: string) => {
   return "Workspace";
 };
 
-export default function Header({ userEmail, userName, planId }: { userEmail: string, userName: string, planId: string }) {
+export default function Header({ userEmail, userName, planId, role }: { userEmail: string, userName: string, planId: string, role: string }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const supabase = createClient();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
-  const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/login"); router.refresh(); };
-
-  const initials = userName ? userName.substring(0, 2).toUpperCase() : "KL";
-  const planName = planId === 'free' ? 'Free' : planId.replace('_', ' ').toUpperCase();
-  
   if (!mounted) return null;
 
   return (
@@ -41,40 +32,13 @@ export default function Header({ userEmail, userName, planId }: { userEmail: str
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:bg-[#111A2E]"><Menu size={20} /></SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]"><Sidebar isMobile={true} /></SheetContent>
+            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]"><Sidebar isMobile={true} role={role} /></SheetContent>
           </Sheet>
         </div>
         <div className="hidden sm:block text-sm font-medium text-[#64748B]">{getBreadcrumb(pathname)}</div>
       </div>
-      
       <div className="flex items-center gap-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-3 outline-none">
-            <div className="hidden sm:flex flex-col items-end">
-              <span className="text-sm font-medium text-white">{userName}</span>
-              <span className="text-xs text-[#64748B]">{userEmail}</span>
-            </div>
-            <Avatar className="h-10 w-10 border border-[#27344B]">
-              <AvatarFallback className="bg-[#111A2E] text-primary text-xs font-bold">{initials}</AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-[#111A2E] border-[#27344B] text-white">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-2">
-                <p className="text-sm font-medium leading-none">{userName}</p>
-                <p className="text-xs leading-none text-[#64748B]">{userEmail}</p>
-                {/* Plan Badge */}
-                <span className="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 w-max">
-                  {planName} Plan
-                </span>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-[#27344B]" />
-            <DropdownMenuItem onClick={() => router.push("/dashboard/settings")} className="hover:bg-[#0B1020] cursor-pointer"><Settings size={16} className="mr-2" /> Settings</DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-[#27344B]" />
-            <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10 cursor-pointer"><LogOut size={16} className="mr-2" /> Sign Out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <UserDropdown userEmail={userEmail} userName={userName} planId={planId} />
       </div>
     </header>
   );
