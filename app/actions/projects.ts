@@ -1,0 +1,16 @@
+"use server";
+import { createClient } from "@/lib/supabase/server";
+import { canCreateResource } from "@/lib/entitlements";
+
+export async function createProjectAction(data: any) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const check = await canCreateResource(user.id, 'projects');
+  if (!check.allowed) return { error: check.message };
+
+  const { error } = await supabase.from("projects").insert([{ ...data, user_id: user.id }]);
+  if (error) return { error: error.message };
+  return { success: true };
+}

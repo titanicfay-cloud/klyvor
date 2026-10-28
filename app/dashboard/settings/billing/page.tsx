@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PLAN_CONFIG, PlanId } from "@/lib/plans";
 import { initializePaystackCheckout } from "@/app/actions/paystack";
-import { cancelSubscriptionAction } from "@/app/actions/workspace";
+import { cancelSubscriptionAction } from "@/app/actions/billing";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { CheckCircle2, Loader2, ShieldCheck, Zap, Building2, Briefcase, GraduationCap, Crown, Users } from "lucide-react";
