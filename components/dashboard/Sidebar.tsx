@@ -17,6 +17,7 @@ const navItems = [
   { title: "EXPLORE", items: [
       { label: "Project Planner", href: "/dashboard/projects", icon: Calendar, premium: true },
       { label: "Clients", href: "/dashboard/clients", icon: Users, premium: true },
+      { label: "CV Builder", href: "/dashboard/resumes", icon: FileText, premium: true },
   ]},
 ];
 
