@@ -12,10 +12,11 @@ const allTools = [
   { name: "Project Planner", description: "Plan projects, organise milestones, and keep work moving forward.", href: "/dashboard/projects", category: "Planning", icon: Calendar, premium: true },
   { name: "Documents & Notes", description: "Create, organise, and save notes and rich documents.", href: "/dashboard/documents", category: "Documents & Writing", icon: FileText, premium: false },
   { name: "Client Manager", description: "Manage your clients and keep your relationships organized.", href: "/dashboard/clients", category: "Business & Finance", icon: Users, premium: true },
+  { name: "CV Builder", description: "Create ATS-friendly resumes and export them to PDF.", href: "/dashboard/resumes", category: "Professional", icon: FileText, premium: true },
   { name: "Pricing Calculator", description: "Estimate your rates using income targets and expenses.", href: "/dashboard/calculator", category: "Business & Finance", icon: Calculator, premium: false },
 ];
 
-const categories = ["All Tools", "Productivity", "Documents & Writing", "Business & Finance", "Planning"];
+const categories = ["All Tools", "Productivity", "Documents & Writing", "Business & Finance", "Professional", "Planning"];
 
 export default function DirectoryPage() {
   const supabase = createClient();
