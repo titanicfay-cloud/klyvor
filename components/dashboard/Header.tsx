@@ -10,7 +10,7 @@ const getBreadcrumb = (path: string) => {
   if (path === "/dashboard") return "Workspace / Overview";
   if (path.includes("directory")) return "Workspace / Tool Directory";
   if (path.includes("tasks")) return "Workspace / Tasks";
-  if (path.includes("calendar")) return "Workspace / Calendar";
+  if (path.includes("time-tracker")) return "Workspace / Time Tracker";
   if (path.includes("documents")) return "Workspace / Documents & Notes";
   if (path.includes("calculator")) return "Workspace / Pricing Calculator";
   if (path.includes("projects")) return "Workspace / Project Planner";
@@ -22,6 +22,7 @@ const getBreadcrumb = (path: string) => {
 export default function Header({ userEmail, userName, planId, role }: { userEmail: string, userName: string, planId: string, role: string }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
   if (!mounted) return null;
@@ -30,9 +31,12 @@ export default function Header({ userEmail, userName, planId, role }: { userEmai
     <header className="h-20 border-b border-[#27344B] bg-[#0B1020]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 sm:px-8">
       <div className="flex items-center gap-4">
         <div className="lg:hidden">
-          <Sheet>
+          <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
             <SheetTrigger className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:bg-[#111A2E]"><Menu size={20} /></SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]"><Sidebar isMobile={true} role={role} /></SheetContent>
+            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]">
+              {/* FIXED: Passed onNavigate to close the mobile menu */}
+              <Sidebar isMobile={true} role={role} planId={planId} onNavigate={() => setIsMobileOpen(false)} />
+            </SheetContent>
           </Sheet>
         </div>
         <div className="hidden sm:block text-sm font-medium text-[#64748B]">{getBreadcrumb(pathname)}</div>

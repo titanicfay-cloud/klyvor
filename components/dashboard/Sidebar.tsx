@@ -4,24 +4,29 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert, Clock } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert, Clock, Lock } from "lucide-react";
 
-type NavItem = { label: string; href: string; icon: any; };
-type NavGroup = { title: string; items: NavItem[]; };
-
-const navItems: NavGroup[] = [
-  { title: "WORKSPACE", items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard }, { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid }]},
-  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
-      { label: "Time Tracker", href: "/dashboard/time-tracker", icon: Clock }, { label: "Calendar", href: "/dashboard/calendar", icon: Calendar }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
-  { title: "EXPLORE", items: [{ label: "Project Planner", href: "/dashboard/projects", icon: Calendar }, { label: "Clients", href: "/dashboard/clients", icon: Users }]},
+const navItems = [
+  { title: "WORKSPACE", items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard, premium: false }, { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid, premium: false }]},
+  { title: "YOUR WORK", items: [
+      { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare, premium: false },
+      { label: "Time Tracker", href: "/dashboard/time-tracker", icon: Clock, premium: true },
+      { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText, premium: false },
+      { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator, premium: false },
+  ]},
+  { title: "EXPLORE", items: [
+      { label: "Project Planner", href: "/dashboard/projects", icon: Calendar, premium: true },
+      { label: "Clients", href: "/dashboard/clients", icon: Users, premium: true },
+  ]},
 ];
 
-export default function Sidebar({ isMobile = false, onNavigate, role }: { isMobile?: boolean, onNavigate?: () => void, role: string }) {
+export default function Sidebar({ isMobile = false, onNavigate, role, planId }: { isMobile?: boolean, onNavigate?: () => void, role: string, planId: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const isStaff = role === 'owner' || role === 'admin' || role === 'support';
   const staffLabel = role === 'owner' ? 'Owner Portal' : role === 'admin' ? 'Admin Portal' : 'Support Portal';
+  const isFree = planId === 'free';
 
   const handleSignOut = async () => { await supabase.auth.signOut(); router.push("/login"); router.refresh(); };
 
@@ -38,10 +43,17 @@ export default function Sidebar({ isMobile = false, onNavigate, role }: { isMobi
             <ul className="space-y-1">
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
+                const isLocked = isFree && item.premium;
+                const targetHref = isLocked ? "/pricing" : item.href;
+
                 return (
                   <li key={item.label}>
-                    <Link href={item.href} onClick={onNavigate} className={cn("flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", isActive ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
-                      <div className="flex items-center gap-3"><item.icon size={18} className={isActive ? "text-primary" : "text-[#64748B]"} />{item.label}</div>
+                    <Link href={targetHref} onClick={onNavigate} className={cn("flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors border", isActive ? "bg-[#111A2E] border-primary/30 text-primary" : "border-transparent text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white")}>
+                      <div className="flex items-center gap-3">
+                        <item.icon size={18} className={isActive ? "text-primary" : "text-[#64748B]"} />
+                        {item.label}
+                      </div>
+                      {isLocked && <Lock size={12} className="text-[#F59E0B]" />}
                     </Link>
                   </li>
                 );
