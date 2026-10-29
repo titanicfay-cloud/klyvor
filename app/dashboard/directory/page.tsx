@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, CheckSquare, FileText, Calculator, Calendar, Users, ArrowRight, Lock, Clock } from "lucide-react";
+import { Search, CheckSquare, FileText, Calculator, Calendar, Users, ArrowRight, Lock, Clock, Receipt } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +13,7 @@ const allTools = [
   { name: "Documents & Notes", description: "Create, organise, and save notes and rich documents.", href: "/dashboard/documents", category: "Documents & Writing", icon: FileText, premium: false },
   { name: "Client Manager", description: "Manage your clients and keep your relationships organized.", href: "/dashboard/clients", category: "Business & Finance", icon: Users, premium: true },
   { name: "CV Builder", description: "Create ATS-friendly resumes and export them to PDF.", href: "/dashboard/resumes", category: "Professional", icon: FileText, premium: true },
+  { name: "Invoice Builder", description: "Create professional invoices and track payments.", href: "/dashboard/invoices", category: "Business & Finance", icon: Receipt, premium: true },
   { name: "Pricing Calculator", description: "Estimate your rates using income targets and expenses.", href: "/dashboard/calculator", category: "Business & Finance", icon: Calculator, premium: false },
 ];
 
