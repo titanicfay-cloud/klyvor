@@ -60,7 +60,7 @@ export default function DirectoryPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTools.map((tool) => {
           const isLocked = isFree && tool.premium;
-          const targetHref = isLocked ? "/pricing" : tool.href;
+          const targetHref = isLocked ? "/dashboard/settings/billing" : tool.href;
 
           return (
             <div key={tool.name} className="bg-[#0B1020] border border-[#27344B] rounded-xl p-6 flex flex-col h-full hover:border-[#00D4FF] transition-all relative">

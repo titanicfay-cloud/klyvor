@@ -54,7 +54,7 @@ export default async function DashboardOverview() {
         <div className="mb-4"><h2 className="text-xl font-bold text-white">Explore More</h2></div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* FIXED: Added Lock UI for Free users */}
-          <Link href={isFree ? "/pricing" : "/dashboard/projects"} className="bg-[#111A2E] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all flex items-start gap-4 relative">
+          <Link href={isFree ? "/dashboard/settings/billing" : "/dashboard/projects"} className="bg-[#111A2E] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all flex items-start gap-4 relative">
             <Calendar className="text-secondary shrink-0" size={24} />
             <div>
               <div className="flex items-center gap-2 mb-1"><h3 className="text-white font-semibold">Project Planner</h3>{isFree && <Lock size={12} className="text-[#F59E0B]" />}</div>
@@ -62,7 +62,7 @@ export default async function DashboardOverview() {
               {isFree && <p className="text-xs text-[#F59E0B] mt-2 font-semibold">Upgrade to Unlock</p>}
             </div>
           </Link>
-          <Link href={isFree ? "/pricing" : "/dashboard/clients"} className="bg-[#111A2E] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all flex items-start gap-4 relative">
+          <Link href={isFree ? "/dashboard/settings/billing" : "/dashboard/clients"} className="bg-[#111A2E] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all flex items-start gap-4 relative">
             <Users className="text-secondary shrink-0" size={24} />
             <div>
               <div className="flex items-center gap-2 mb-1"><h3 className="text-white font-semibold">Client Manager</h3>{isFree && <Lock size={12} className="text-[#F59E0B]" />}</div>

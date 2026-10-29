@@ -44,7 +44,7 @@ export default function Sidebar({ isMobile = false, onNavigate, role, planId }: 
               {group.items.map((item) => {
                 const isActive = pathname === item.href;
                 const isLocked = isFree && item.premium;
-                const targetHref = isLocked ? "/pricing" : item.href;
+                const targetHref = isLocked ? "/dashboard/settings/billing" : item.href;
 
                 return (
                   <li key={item.label}>
