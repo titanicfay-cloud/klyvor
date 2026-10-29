@@ -4,14 +4,15 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert, Clock } from "lucide-react";
 
 type NavItem = { label: string; href: string; icon: any; };
 type NavGroup = { title: string; items: NavItem[]; };
 
 const navItems: NavGroup[] = [
   { title: "WORKSPACE", items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard }, { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid }]},
-  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare }, { label: "Calendar", href: "/dashboard/calendar", icon: Calendar }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
+  { title: "YOUR WORK", items: [{ label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare },
+      { label: "Time Tracker", href: "/dashboard/time-tracker", icon: Clock }, { label: "Calendar", href: "/dashboard/calendar", icon: Calendar }, { label: "Documents & Notes", href: "/dashboard/documents", icon: FileText }, { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator }]},
   { title: "EXPLORE", items: [{ label: "Project Planner", href: "/dashboard/projects", icon: Calendar }, { label: "Clients", href: "/dashboard/clients", icon: Users }]},
 ];
 
