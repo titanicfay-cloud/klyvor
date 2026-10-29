@@ -39,24 +39,34 @@ export default function InvoicesPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    // Get Workspace
-    const { data: member } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", user.id).single();
-    if (!member) return;
+      // Get Workspace
+      const { data: member, error: memberError } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", user.id).single();
+      
+      if (memberError || !member) {
+        toast.error("Could not find your workspace.");
+        return;
+      }
 
-    // Fetch Invoices, Clients, Projects for this workspace
-    const [invRes, clientRes, projRes] = await Promise.all([
-      supabase.from("invoices").select("*").eq("workspace_id", member.workspace_id).order("created_at", { ascending: false }),
-      supabase.from("clients").select("id, name").order("name"),
-      supabase.from("projects").select("id, name").order("name")
-    ]);
+      const [invRes, clientRes, projRes] = await Promise.all([
+        supabase.from("invoices").select("*").eq("workspace_id", member.workspace_id).order("created_at", { ascending: false }),
+        supabase.from("clients").select("id, name").order("name"),
+        supabase.from("projects").select("id, name").order("name")
+      ]);
 
-    setInvoices(invRes.data || []);
-    setClients(clientRes.data || []);
-    setProjects(projRes.data || []);
-    setLoading(false);
+      setInvoices(invRes.data || []);
+      setClients(clientRes.data || []);
+      setProjects(projRes.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred loading invoices.");
+    } finally {
+      // GUARANTEES THE LOADING SPINNER STOPS
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -102,7 +112,6 @@ export default function InvoicesPage() {
 
   if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading...</div>;
 
-  // VIEW 1: LIST OF INVOICES
   if (!activeInvoice) {
     return (
       <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
@@ -138,11 +147,8 @@ export default function InvoicesPage() {
     );
   }
 
-  // VIEW 2: THE BUILDER
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col animate-in fade-in duration-500 relative">
-      
-      {/* DESKTOP TOOLBAR */}
       <div className="hidden lg:flex h-16 border-b border-[#27344B] items-center justify-between px-6 bg-[#111A2E]/50 shrink-0 no-print">
         <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={() => setActiveInvoice(null)} className="text-[#C7D0E0] hover:text-white"><ArrowLeft size={20} /></Button>
@@ -154,7 +160,6 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* MOBILE TOOLBAR */}
       <div className="lg:hidden flex flex-col bg-[#111A2E]/50 border-b border-[#27344B] shrink-0 no-print">
         <div className="flex items-center gap-2 p-2">
           <Button variant="ghost" onClick={() => setActiveInvoice(null)} className="text-[#C7D0E0] hover:text-white shrink-0 h-8 w-8 p-0"><ArrowLeft size={20} /></Button>
@@ -178,7 +183,6 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#0B1020] pb-16 lg:pb-0">
         <div className={cn("w-full lg:w-1/3 overflow-y-auto p-4 sm:p-6 border-r border-[#27344B] no-print", isMobilePreviewOpen && "hidden lg:block")}>
           <InvoiceForm data={data} setData={setData} clients={clients} projects={projects} />
@@ -191,7 +195,6 @@ export default function InvoicesPage() {
         </div>
       </div>
 
-      {/* MOBILE BOTTOM STICKY BAR */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[#111A2E] border-t border-[#27344B] flex gap-2 z-50 no-print">
         <Button onClick={handlePrint} variant="outline" className="flex-1 border-[#27344B] text-white h-11">
           <Printer size={18} className="mr-2"/> Export PDF
