@@ -32,7 +32,6 @@ export default function ResumesPage() {
   const [data, setData] = useState<ResumeData>(emptyResume);
   const [isSaving, setIsSaving] = useState(false);
   
-  // NEW: Mobile Preview State
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
 
   const fetchResumes = async () => {
@@ -118,21 +117,17 @@ export default function ResumesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col animate-in fade-in duration-500">
-      <div className="h-16 border-b border-[#27344B] flex items-center justify-between px-4 sm:px-6 bg-[#111A2E]/50 shrink-0 no-print">
+    <div className="h-[calc(100vh-8rem)] flex flex-col animate-in fade-in duration-500 relative">
+      
+      {/* DESKTOP TOOLBAR (Hidden on mobile) */}
+      <div className="hidden lg:flex h-16 border-b border-[#27344B] items-center justify-between px-6 bg-[#111A2E]/50 shrink-0 no-print">
         <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={() => setActiveResume(null)} className="text-[#C7D0E0] hover:text-white"><ArrowLeft size={20} /></Button>
-          <Input value={title} onChange={e => setTitle(e.target.value)} className="bg-transparent border-none text-white font-bold text-lg w-[150px] sm:w-[250px] focus-visible:ring-0 px-0" />
+          <Input value={title} onChange={e => setTitle(e.target.value)} className="bg-transparent border-none text-white font-bold text-lg w-[250px] focus-visible:ring-0 px-0" />
         </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* FIXED: Added Mobile Preview Toggle */}
-          <Button onClick={() => setIsMobilePreviewOpen(!isMobilePreviewOpen)} variant="outline" className="lg:hidden border-[#27344B] text-white h-9 px-3">
-            {isMobilePreviewOpen ? <><Edit size={16} className="mr-2"/> Edit</> : <><Eye size={16} className="mr-2"/> Preview</>}
-          </Button>
-
+        <div className="flex items-center gap-3">
           <Select value={template} onValueChange={(val) => setTemplate(val as string)}>
-            <SelectTrigger className="w-[130px] sm:w-[150px] bg-[#0B1020] border-[#27344B] text-white h-9">
-              {/* FIXED: Added explicit mapping to fix raw data */}
+            <SelectTrigger className="w-[150px] bg-[#0B1020] border-[#27344B] text-white h-9">
               <SelectValue placeholder="Template">
                 {template === 'ats' ? 'ATS Minimal' : template === 'modern' ? 'Modern Pro' : 'Classic Serif'}
               </SelectValue>
@@ -143,25 +138,61 @@ export default function ResumesPage() {
               <SelectItem value="classic">Classic Serif</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Button onClick={handlePrint} variant="outline" className="hidden sm:flex border-[#27344B] text-white h-9"><Printer size={16} className="mr-2"/> Export</Button>
+          <Button onClick={handlePrint} variant="outline" className="border-[#27344B] text-white h-9"><Printer size={16} className="mr-2"/> Export PDF</Button>
           <Button onClick={handleSave} disabled={isSaving} className="bg-klyvor-gradient text-white h-9">{isSaving ? <Loader2 className="animate-spin" size={16}/> : <><Save size={16} className="mr-2"/> Save</>}</Button>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#0B1020]">
-        {/* Left Pane: Form (Hides on mobile if Preview is open) */}
-        <div className={cn("w-full lg:w-1/3 overflow-y-auto p-6 border-r border-[#27344B] no-print", isMobilePreviewOpen && "hidden lg:block")}>
+      {/* MOBILE TOP BAR (Hidden on desktop) */}
+      <div className="lg:hidden flex flex-col bg-[#111A2E]/50 border-b border-[#27344B] shrink-0 no-print">
+        {/* Row 1: Back & Title */}
+        <div className="flex items-center gap-2 p-2">
+          <Button variant="ghost" onClick={() => setActiveResume(null)} className="text-[#C7D0E0] hover:text-white shrink-0 h-8 w-8 p-0"><ArrowLeft size={20} /></Button>
+          <Input value={title} onChange={e => setTitle(e.target.value)} className="bg-transparent border-none text-white font-bold text-base focus-visible:ring-0 px-0 h-8" />
+        </div>
+        {/* Row 2: Toggle & Template */}
+        <div className="flex items-center gap-2 px-2 pb-2">
+          <Button onClick={() => setIsMobilePreviewOpen(!isMobilePreviewOpen)} variant="outline" className="flex-1 border-[#27344B] text-white h-9 px-2 text-xs">
+            {isMobilePreviewOpen ? <><Edit size={14} className="mr-1"/> Edit Form</> : <><Eye size={14} className="mr-1"/> Preview</>}
+          </Button>
+          <Select value={template} onValueChange={(val) => setTemplate(val as string)}>
+            <SelectTrigger className="flex-1 bg-[#0B1020] border-[#27344B] text-white h-9 text-xs">
+              <SelectValue placeholder="Template">
+                {template === 'ats' ? 'ATS Minimal' : template === 'modern' ? 'Modern Pro' : 'Classic Serif'}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">
+              <SelectItem value="ats">ATS Minimal</SelectItem>
+              <SelectItem value="modern">Modern Pro</SelectItem>
+              <SelectItem value="classic">Classic Serif</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT (Form & Preview) */}
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#0B1020] pb-16 lg:pb-0">
+        <div className={cn("w-full lg:w-1/3 overflow-y-auto p-4 sm:p-6 border-r border-[#27344B] no-print", isMobilePreviewOpen && "hidden lg:block")}>
           <ResumeForm data={data} setData={setData} />
         </div>
 
-        {/* Right Pane: Preview (Shows on mobile if Preview is open) */}
-        <div className={cn("flex-1 overflow-y-auto p-4 sm:p-8 bg-[#1e293b] justify-center", isMobilePreviewOpen ? "flex" : "hidden lg:flex")}>
+        <div className={cn("flex-1 overflow-y-auto p-2 sm:p-8 bg-[#1e293b] justify-center", isMobilePreviewOpen ? "flex" : "hidden lg:flex")}>
           <div className="resume-print-area w-full flex justify-center">
              <ResumePreview data={data} template={template} />
           </div>
         </div>
       </div>
+
+      {/* MOBILE BOTTOM STICKY BAR (Export & Save) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[#111A2E] border-t border-[#27344B] flex gap-2 z-50 no-print">
+        <Button onClick={handlePrint} variant="outline" className="flex-1 border-[#27344B] text-white h-11">
+          <Printer size={18} className="mr-2"/> Export PDF
+        </Button>
+        <Button onClick={handleSave} disabled={isSaving} className="flex-1 bg-klyvor-gradient text-white h-11">
+          {isSaving ? <Loader2 className="animate-spin" size={18}/> : <><Save size={18} className="mr-2"/> Save</>}
+        </Button>
+      </div>
+
     </div>
   );
 }
