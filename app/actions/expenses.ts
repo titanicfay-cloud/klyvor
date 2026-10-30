@@ -13,9 +13,18 @@ export async function saveExpenseAction(data: any) {
     return { error: "Expense Tracker requires the Business plan or higher." };
   }
 
-  // 2. Workspace Check
-  const { data: member } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", user.id).single();
-  if (!member) return { error: "Workspace not found." };
+  // 2. SELF-HEALING WORKSPACE LOGIC
+  let { data: member } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", user.id).maybeSingle();
+  
+  if (!member) {
+    // If no workspace exists, create one instantly
+    const { data: newWs, error: wsError } = await supabase.from("workspaces").insert([{ name: "My Workspace", type: "personal" }]).select().single();
+    
+    if (wsError || !newWs) return { error: "Failed to create workspace." };
+
+    await supabase.from("workspace_members").insert([{ workspace_id: newWs.id, user_id: user.id, role: 'owner' }]);
+    member = { workspace_id: newWs.id };
+  }
 
   // 3. Server-Side Math & Validation
   const amount = Number(data.amount);
