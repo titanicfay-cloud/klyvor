@@ -40,7 +40,8 @@ export default function ExpenseModal({ isOpen, setIsOpen, editingExpense, onSave
     onSave({ 
       id: editingExpense?.id, 
       vendor, description, category, expense_date: expenseDate, 
-      amount: parseFloat(amount), amount_paid: parseFloat(amountPaid) || 0, 
+      amount: parseFloat(amount) || 0, 
+      amount_paid: parseFloat(amountPaid) || 0, 
       currency, payment_method: paymentMethod 
     });
   };
@@ -82,7 +83,7 @@ export default function ExpenseModal({ isOpen, setIsOpen, editingExpense, onSave
                 <SelectContent className="bg-[#111A2E] border-[#27344B] text-white">{METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <p className="col-span-2 text-xs text-[#64748B]">Leave Amount Paid at 0 to mark this as Unpaid. The server will automatically calculate the status.</p>
+            <p className="col-span-2 text-xs text-[#64748B]">Leave Amount Paid at 0 to mark this as Unpaid.</p>
           </div>
 
           <DialogFooter className="pt-4">
