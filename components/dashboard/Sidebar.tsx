@@ -4,7 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert, Clock, Receipt, Lock } from "lucide-react";
+import { LayoutDashboard, LayoutGrid, CheckSquare, FileText, Calculator, Calendar, Settings, LogOut, Users, ShieldAlert, Clock, Receipt, Lock, Wallet } from "lucide-react";
 
 const navItems = [
   { title: "WORKSPACE", items: [{ label: "Overview", href: "/dashboard", icon: LayoutDashboard, premium: false }, { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid, premium: false }]},
@@ -20,6 +20,7 @@ const navItems = [
       { label: "CV Builder", href: "/dashboard/resumes", icon: FileText, premium: true },
       { label: "Proposals", href: "/dashboard/proposals", icon: FileText, premium: true },
       { label: "Invoices", href: "/dashboard/invoices", icon: Receipt, premium: true },
+      { label: "Expenses", href: "/dashboard/expenses", icon: Wallet, premium: true },
   ]},
 ];
 
