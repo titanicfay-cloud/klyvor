@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { canAccessTool, PlanId, ToolId } from "@/lib/plans";
 import {
   LayoutDashboard,
   LayoutGrid,
@@ -28,38 +29,38 @@ const navGroups = [
   {
     title: "Workspace",
     items: [
-      { label: "Overview", href: "/dashboard", icon: LayoutDashboard, premium: false },
-      { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid, premium: false },
+      { label: "Overview", href: "/dashboard", icon: LayoutDashboard, toolId: null },
+      { label: "Tool Directory", href: "/dashboard/directory", icon: LayoutGrid, toolId: null },
     ],
   },
   {
     title: "Daily Work",
     items: [
-      { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare, premium: false },
-      { label: "Time Tracker", href: "/dashboard/time-tracker", icon: Clock, premium: true },
-      { label: "Documents", href: "/dashboard/documents", icon: FileText, premium: false },
-      { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator, premium: false },
+      { label: "Tasks", href: "/dashboard/tasks", icon: CheckSquare, toolId: "tasks" as ToolId },
+      { label: "Time Tracker", href: "/dashboard/time-tracker", icon: Clock, toolId: "time-tracker" as ToolId },
+      { label: "Documents", href: "/dashboard/documents", icon: FileText, toolId: "documents" as ToolId },
+      { label: "Pricing Calculator", href: "/dashboard/calculator", icon: Calculator, toolId: "calculator" as ToolId },
     ],
   },
   {
     title: "Clients & Projects",
     items: [
-      { label: "Projects", href: "/dashboard/projects", icon: Calendar, premium: true },
-      { label: "Clients", href: "/dashboard/clients", icon: Users, premium: true },
+      { label: "Projects", href: "/dashboard/projects", icon: Calendar, toolId: "projects" as ToolId },
+      { label: "Clients", href: "/dashboard/clients", icon: Users, toolId: "clients" as ToolId },
     ],
   },
   {
     title: "Money",
     items: [
-      { label: "Invoices", href: "/dashboard/invoices", icon: Receipt, premium: true },
-      { label: "Expenses", href: "/dashboard/expenses", icon: Wallet, premium: true },
+      { label: "Invoices", href: "/dashboard/invoices", icon: Receipt, toolId: "invoices" as ToolId },
+      { label: "Expenses", href: "/dashboard/expenses", icon: Wallet, toolId: "expenses" as ToolId },
     ],
   },
   {
     title: "Professional",
     items: [
-      { label: "Proposals", href: "/dashboard/proposals", icon: FileText, premium: true },
-      { label: "CV Builder", href: "/dashboard/resumes", icon: FileText, premium: true },
+      { label: "Proposals", href: "/dashboard/proposals", icon: FileText, toolId: "proposals" as ToolId },
+      { label: "CV Builder", href: "/dashboard/resumes", icon: FileText, toolId: "resumes" as ToolId },
     ],
   },
 ];
@@ -82,7 +83,8 @@ export default function Sidebar({
   const isStaff = role === "owner" || role === "admin" || role === "support";
   const staffLabel =
     role === "owner" ? "Owner Portal" : role === "admin" ? "Admin Portal" : "Support Portal";
-  const isFree = planId === "free";
+
+  const currentPlan = (planId || "free") as PlanId;
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     Workspace: true,
@@ -147,8 +149,13 @@ export default function Sidebar({
                   {group.items.map((item) => {
                     const isActive =
                       pathname === item.href || pathname.startsWith(item.href + "/");
-                    const isLocked = isFree && item.premium;
-                    const targetHref = isLocked ? "/dashboard/settings/billing" : item.href;
+
+                    const isLocked =
+                      item.toolId !== null && !canAccessTool(currentPlan, item.toolId);
+
+                    const targetHref = isLocked
+                      ? "/dashboard/settings/billing"
+                      : item.href;
 
                     return (
                       <li key={item.label}>
@@ -169,7 +176,9 @@ export default function Sidebar({
                             />
                             <span>{item.label}</span>
                           </div>
-                          {isLocked && <Lock size={12} className="text-[#F59E0B] shrink-0" />}
+                          {isLocked && (
+                            <Lock size={12} className="text-[#F59E0B] shrink-0" />
+                          )}
                         </Link>
                       </li>
                     );
@@ -212,7 +221,9 @@ export default function Sidebar({
           <Settings
             size={17}
             className={
-              pathname.startsWith("/dashboard/settings") ? "text-primary" : "text-[#64748B]"
+              pathname.startsWith("/dashboard/settings")
+                ? "text-primary"
+                : "text-[#64748B]"
             }
           />
           Settings
