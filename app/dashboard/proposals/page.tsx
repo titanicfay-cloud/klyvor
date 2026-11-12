@@ -161,9 +161,8 @@ export default function ProposalsPage() {
               <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
                 {p.title || "Untitled Proposal"}
               </h3>
-              <p className="text-sm text-[#64748B] mb-4">
-                Client: {clients.find((c) => c.id === p.client_id)?.name || "N/A"}
-              </p>
+              <p className="text-sm text-[#64748B]">Client: {clients.find((c) => c.id === p.client_id)?.name || "No client"}</p>
+              <p className="mb-4 text-sm font-semibold text-white">{p.currency || "USD"} {Number(p.total_amount || 0).toLocaleString()}</p>
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#27344B]">
                 <span className="text-xs font-semibold text-[#F59E0B] uppercase">
                   {p.status || "draft"}

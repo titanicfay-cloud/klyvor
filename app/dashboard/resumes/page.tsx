@@ -109,7 +109,7 @@ export default function ResumesPage() {
               <button onClick={(e) => handleDelete(r.id, e)} className="absolute top-4 right-4 text-[#64748B] hover:text-[#EF4444]"><Trash2 size={16}/></button>
               <div className="w-10 h-10 rounded-lg bg-[#111A2E] border border-[#27344B] flex items-center justify-center mb-4"><FileText size={20} className="text-primary"/></div>
               <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary">{r.title}</h3>
-              <p className="text-xs text-[#64748B] uppercase tracking-wider mt-auto pt-4">{r.template} Template</p>
+              <div className="mt-auto flex items-center justify-between pt-4"><p className="text-xs uppercase tracking-wider text-[#64748B]">{r.template} template</p><p className="text-[10px] text-[#64748B]">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}</p></div>
             </div>
           ))}
         </div>

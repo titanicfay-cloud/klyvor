@@ -34,7 +34,7 @@ export default function CalculatorPage() {
   const numIncome = parseFloat(income) || 0;
   const numExpenses = parseFloat(expenses) || 0;
   const numHours = parseFloat(hours) || 0;
-  const calculatedHourlyRate = numIncome > 0 && numHours > 0 ? (numIncome + numExpenses) / numHours : 0;
+  const calculatedHourlyRate = numHours > 0 ? (numIncome + numExpenses) / numHours : 0;
   const effectiveRate = rateType === "calculated" ? calculatedHourlyRate : (parseFloat(customRate) || 0);
   const basePrice = (parseFloat(projectHours) || 0) * effectiveRate;
   const suggestedPrice = basePrice * (1 + (parseFloat(contingency) || 0) / 100);
@@ -95,7 +95,7 @@ export default function CalculatorPage() {
 
       <div className="pt-10 border-t border-[#27344B]">
         <h2 className="text-xl font-bold text-white mb-2">Saved Calculations</h2>
-        {loading ? ( <div className="text-[#64748B]">Loading...</div> ) : savedCalcs.length === 0 ? (
+        {loading ? ( <div className="flex min-h-[20vh] flex-col items-center justify-center text-sm text-[#C7D0E0]"><div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#27344B] border-t-[#00D4FF]" />Loading...</div> ) : savedCalcs.length === 0 ? (
           <div className="border border-dashed border-[#27344B] rounded-xl p-10 text-center bg-[#111A2E]/50"><h3 className="text-white font-medium mb-2">No saved calculations yet.</h3></div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -103,7 +103,7 @@ export default function CalculatorPage() {
               <div key={calc.id} className="bg-[#0B1020] border border-[#27344B] p-5 rounded-xl flex flex-col">
                 <div className="flex justify-between items-start mb-2"><h3 className="text-white font-semibold truncate pr-4">{calc.name}</h3><button onClick={() => handleDelete(calc.id)} className="text-[#64748B] hover:text-[#EF4444] transition-colors"><Trash2 size={16} /></button></div>
                 <p className="text-xs text-[#64748B] mb-4">Saved {new Date(calc.created_at).toLocaleDateString()}</p>
-                <div className="space-y-1 text-sm text-[#C7D0E0] mb-6 flex-grow"><div className="flex justify-between"><span>Hourly:</span> <span className="text-primary font-medium">{formatCurrency((calc.monthly_income_target + calc.monthly_expenses) / calc.billable_hours_per_month)}</span></div></div>
+                <div className="space-y-1 text-sm text-[#C7D0E0] mb-6 flex-grow"><div className="flex justify-between"><span>Hourly:</span> <span className="text-primary font-medium">{calc.billable_hours_per_month > 0 ? formatCurrency((calc.monthly_income_target + calc.monthly_expenses) / calc.billable_hours_per_month) : "—"}</span></div></div>
                 <Button variant="outline" onClick={() => handleLoad(calc)} className="w-full border-[#27344B] text-white hover:bg-[#111A2E] mt-auto">Load <ArrowRight size={14} className="ml-2" /></Button>
               </div>
             ))}

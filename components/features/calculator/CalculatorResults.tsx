@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Save, Copy } from "lucide-react";
+import { toast } from "sonner";
 
 interface CalculatorResultsProps {
   calculatedHourlyRate: number;
@@ -44,9 +45,14 @@ export default function CalculatorResults({
             <div className="flex justify-between text-[#C7D0E0]"><span>Base Price ({numProjectHours} hrs):</span> <span className="text-white">{formatCurrency(basePrice)}</span></div>
             <div className="flex justify-between text-[#C7D0E0]"><span>Contingency ({numContingency}%):</span> <span className="text-white">+{formatCurrency(contingencyAmount)}</span></div>
           </div>
-          <Button onClick={() => setIsSaveModalOpen(true)} className="w-full bg-[#27344B] hover:bg-[#334155] text-white h-11">
-            <Save size={16} className="mr-2" /> Save Calculation
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => { navigator.clipboard.writeText(formatCurrency(suggestedPrice)); toast.success("Price copied."); }} variant="outline" className="flex-1 border-[#27344B] text-white h-11">
+              <Copy size={16} className="mr-2" /> Copy price
+            </Button>
+            <Button onClick={() => setIsSaveModalOpen(true)} className="flex-1 bg-[#27344B] hover:bg-[#334155] text-white h-11">
+              <Save size={16} className="mr-2" /> Save
+            </Button>
+          </div>
         </div>
 
         <p className="text-xs text-[#64748B] text-center leading-relaxed px-4">
