@@ -1,7 +1,7 @@
 export function PageLoading({ label = "Loading..." }: { label?: string }) {
   return (
-    <div className="col-span-full flex flex-col items-center justify-center py-20 text-[#C7D0E0]">
-      <div className="h-8 w-8 rounded-full border-2 border-[#27344B] border-t-[#00D4FF] animate-spin mb-4" />
+    <div className="flex w-full min-h-[40vh] flex-col items-center justify-center py-20 text-[#C7D0E0]">
+      <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#27344B] border-t-[#00D4FF]" />
       <p className="text-sm">{label}</p>
     </div>
   );

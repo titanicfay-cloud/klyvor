@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -118,7 +119,7 @@ export default function InvoicesPage() {
 
   const handlePrint = () => { window.print(); };
 
-  if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading...</div>;
+  if (loading) return <PageLoading />;
 
   if (!activeInvoice) {
     return (

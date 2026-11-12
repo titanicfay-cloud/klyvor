@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,7 @@ export default function ExpensesPage() {
     return "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30";
   };
 
-  if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading expenses...</div>;
+  if (loading) return <PageLoading />;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">

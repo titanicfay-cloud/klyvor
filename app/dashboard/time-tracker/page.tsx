@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
@@ -44,7 +45,7 @@ export default function TimeTrackerPage() {
     else toast.error("Failed to delete.");
   };
 
-  if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading tracker...</div>;
+  if (loading) return <PageLoading />;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
