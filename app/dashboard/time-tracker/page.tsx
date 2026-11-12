@@ -31,7 +31,7 @@ export default function TimeTrackerPage() {
     const { data: activeData } = await supabase.from("time_entries").select("*").eq("user_id", user.id).is("end_time", null).single();
     setActiveEntry(activeData || null);
 
-    const { data: entryData } = await supabase.from("time_entries").select("*").eq("user_id", user.id).not("end_time", "is", null).order("start_time", { ascending: false }).limit(20);
+    const { data: entryData } = await supabase.from("time_entries").select("*").eq("user_id", user.id).not("end_time", "is", null).order("start_time", { ascending: false }).limit(200);
     setEntries(entryData || []);
 
     setLoading(false);
@@ -58,7 +58,7 @@ export default function TimeTrackerPage() {
 
       <ActiveTimer activeEntry={activeEntry} projects={projects} onRefresh={fetchData} />
 
-      <WeekSummary entries={entries} />
+      <WeekSummary entries={entries} activeEntry={activeEntry} />
 
       <div>
         <h2 className="text-xl font-bold text-white mb-4">Recent Entries</h2>

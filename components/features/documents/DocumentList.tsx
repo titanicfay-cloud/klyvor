@@ -35,6 +35,22 @@ export default function DocumentList({
     try { setFolders(JSON.parse(localStorage.getItem(FOLDER_KEY) || "{}")); } catch { setFolders({}); }
   }, []);
 
+  useEffect(() => {
+    if (loading) return;
+    const ids = new Set(documents.map((d) => d.id));
+    setFolders((prev) => {
+      const next: Record<string, string> = {};
+      for (const [id, name] of Object.entries(prev)) {
+        if (ids.has(id)) next[id] = name;
+      }
+      if (JSON.stringify(next) !== JSON.stringify(prev)) {
+        localStorage.setItem(FOLDER_KEY, JSON.stringify(next));
+        return next;
+      }
+      return prev;
+    });
+  }, [documents, loading]);
+
   const saveFolders = (next: Record<string, string>) => {
     setFolders(next);
     localStorage.setItem(FOLDER_KEY, JSON.stringify(next));
