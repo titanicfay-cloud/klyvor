@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading, PageEmpty } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,7 @@ export default function ProjectsPage() {
       </div>
       <div className="flex flex-col md:flex-row gap-3 bg-[#111A2E] p-3 rounded-xl border border-[#27344B]"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" size={16} /><Input placeholder="Search projects..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-[#0B1020] border-[#27344B] text-white h-10" /></div></div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? <div className="col-span-full text-center py-20 text-[#C7D0E0]">Loading...</div> : filteredProjects.length === 0 ? <div className="col-span-full text-center py-20 text-[#C7D0E0]">No projects found.</div> : filteredProjects.map(project => (
+        {loading ? <PageLoading /> : filteredProjects.length === 0 ? <div className="col-span-full text-center py-20 text-[#C7D0E0]">No projects found.</div> : filteredProjects.map(project => (
           <Link key={project.id} href={`/dashboard/projects/${project.id}`} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all group flex flex-col h-full">
             <div className="flex justify-between items-start mb-4"><Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${getStatusColor(project.status)}`}>{project.status}</Badge><Badge variant="outline" className="text-[10px] uppercase tracking-wider text-[#00D4FF] border-[#00D4FF]">{project.priority}</Badge></div>
             <h3 className="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">{project.name}</h3>

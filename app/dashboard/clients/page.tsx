@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading, PageEmpty } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ export default function ClientsPage() {
       </div>
       <div className="flex flex-col md:flex-row gap-3 bg-[#111A2E] p-3 rounded-xl border border-[#27344B]"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" size={16} /><Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-[#0B1020] border-[#27344B] text-white h-10" /></div></div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? <div className="col-span-full text-center py-20 text-[#C7D0E0]">Loading...</div> : filteredClients.length === 0 ? <div className="col-span-full text-center py-20 text-[#C7D0E0]">No clients found.</div> : filteredClients.map(client => (
+        {loading ? <PageLoading /> : filteredClients.length === 0 ? <PageEmpty title="No clients yet" description="Add your first client to start tracking relationships." /> : filteredClients.map(client => (
           <Link key={client.id} href={`/dashboard/clients/${client.id}`} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-xl hover:border-primary/50 transition-all group flex flex-col h-full">
             <div className="flex justify-between items-start mb-4"><div className="w-10 h-10 rounded-lg bg-[#111A2E] border border-[#27344B] flex items-center justify-center shrink-0">{client.client_type === "business" ? <Building2 size={20} className="text-secondary" /> : <User size={20} className="text-primary" />}</div><Badge variant="outline" className={`text-[10px] uppercase tracking-wider ${getStatusColor(client.status)}`}>{client.status}</Badge></div>
             <h3 className="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">{client.name}</h3>

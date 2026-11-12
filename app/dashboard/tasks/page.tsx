@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading, PageEmpty } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -91,7 +92,7 @@ export default function TasksPage() {
         <div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" size={16} /><Input placeholder="Search your tasks..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-[#0B1020] border-[#27344B] text-white h-10" /></div>
         <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as string)}><SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10"><SelectValue>{statusFilter === "all" ? "All Statuses" : statusFilter === "todo" ? "To Do" : statusFilter === "in_progress" ? "In Progress" : "Completed"}</SelectValue></SelectTrigger><SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="all">All Statuses</SelectItem><SelectItem value="todo">To Do</SelectItem><SelectItem value="in_progress">In Progress</SelectItem><SelectItem value="completed">Completed</SelectItem></SelectContent></Select>
       </div>
-      {loading ? <div className="text-center py-20 text-[#C7D0E0]">Loading...</div> : <TaskList tasks={filteredTasks} handleToggleComplete={handleToggleComplete} handleOpenEdit={handleOpenEdit} handleDelete={handleDelete} timezone={timezone} dateFormat={dateFormat} projects={projects} getPriorityColor={getPriorityColor} />}
+      {loading ? <PageLoading /> : <TaskList tasks={filteredTasks} handleToggleComplete={handleToggleComplete} handleOpenEdit={handleOpenEdit} handleDelete={handleDelete} timezone={timezone} dateFormat={dateFormat} projects={projects} getPriorityColor={getPriorityColor} />}
       <TaskModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} editingTask={editingTask} title={title} setTitle={setTitle} description={description} setDescription={setDescription} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} dueDate={dueDate} setDueDate={setDueDate} projectId={projectId} setProjectId={setProjectId} projects={projects} handleSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   );

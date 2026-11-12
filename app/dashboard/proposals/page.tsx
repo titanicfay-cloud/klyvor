@@ -1,4 +1,5 @@
 "use client";
+import { PageLoading, PageEmpty } from "@/components/ui/states";
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -95,7 +96,7 @@ export default function ProposalsPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-white">Loading...</div>;
+    return <PageLoading />;
   }
 
   if (isLocked) {
