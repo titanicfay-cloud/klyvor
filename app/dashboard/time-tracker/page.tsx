@@ -3,6 +3,7 @@ import { PageLoading } from "@/components/ui/states";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import WeekSummary from "@/components/features/timetracker/WeekSummary";
 import { Loader2 } from "lucide-react";
 import ActiveTimer from "@/components/features/timetracker/ActiveTimer";
 import TimeEntryList from "@/components/features/timetracker/TimeEntryList";
@@ -56,6 +57,8 @@ export default function TimeTrackerPage() {
       </div>
 
       <ActiveTimer activeEntry={activeEntry} projects={projects} onRefresh={fetchData} />
+
+      <WeekSummary entries={entries} />
 
       <div>
         <h2 className="text-xl font-bold text-white mb-4">Recent Entries</h2>

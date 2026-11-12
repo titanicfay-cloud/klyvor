@@ -77,6 +77,26 @@ export default function TasksPage() {
 
   const getPriorityColor = (p: string) => { if (p === "urgent") return "bg-[#0B1020] text-[#EF4444] border-[#EF4444]"; if (p === "high") return "bg-[#0B1020] text-[#F59E0B] border-[#F59E0B]"; if (p === "medium") return "bg-[#0B1020] text-[#00D4FF] border-[#00D4FF]"; return "bg-[#0B1020] text-[#C7D0E0] border-[#27344B]"; };
 
+
+  const handleBulkComplete = async (ids: string[]) => {
+    setTasks(tasks.map((t) => ids.includes(t.id) ? { ...t, status: "completed" } : t));
+    const { error } = await supabase.from("tasks").update({ status: "completed", completed_at: new Date().toISOString() }).in("id", ids);
+    if (error) toast.error("Could not update tasks."); else toast.success("Tasks completed.");
+  };
+
+  const handleBulkStatus = async (ids: string[], next: string) => {
+    setTasks(tasks.map((t) => ids.includes(t.id) ? { ...t, status: next } : t));
+    const { error } = await supabase.from("tasks").update({ status: next, completed_at: next === "completed" ? new Date().toISOString() : null }).in("id", ids);
+    if (error) toast.error("Could not update tasks.");
+  };
+
+  const handleBulkDelete = async (ids: string[]) => {
+    if (!confirm(`Delete ${ids.length} tasks?`)) return;
+    const { error } = await supabase.from("tasks").delete().in("id", ids);
+    if (error) toast.error("Could not delete tasks.");
+    else setTasks(tasks.filter((t) => !ids.includes(t.id)));
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-20 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -92,7 +112,7 @@ export default function TasksPage() {
         <div className="relative flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" size={16} /><Input placeholder="Search your tasks..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-[#0B1020] border-[#27344B] text-white h-10" /></div>
         <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val as string)}><SelectTrigger className="w-[140px] bg-[#0B1020] border-[#27344B] text-white h-10"><SelectValue>{statusFilter === "all" ? "All Statuses" : statusFilter === "todo" ? "To Do" : statusFilter === "in_progress" ? "In Progress" : "Completed"}</SelectValue></SelectTrigger><SelectContent className="bg-[#111A2E] border-[#27344B] text-white"><SelectItem value="all">All Statuses</SelectItem><SelectItem value="todo">To Do</SelectItem><SelectItem value="in_progress">In Progress</SelectItem><SelectItem value="completed">Completed</SelectItem></SelectContent></Select>
       </div>
-      {loading ? <PageLoading /> : <TaskList tasks={filteredTasks} handleToggleComplete={handleToggleComplete} handleOpenEdit={handleOpenEdit} handleDelete={handleDelete} timezone={timezone} dateFormat={dateFormat} projects={projects} getPriorityColor={getPriorityColor} />}
+      {loading ? <PageLoading /> : <TaskList tasks={filteredTasks} handleToggleComplete={handleToggleComplete} handleOpenEdit={handleOpenEdit} handleDelete={handleDelete} timezone={timezone} dateFormat={dateFormat} projects={projects} getPriorityColor={getPriorityColor} onBulkComplete={handleBulkComplete} onBulkDelete={handleBulkDelete} onBulkStatus={handleBulkStatus} />}
       <TaskModal isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} editingTask={editingTask} title={title} setTitle={setTitle} description={description} setDescription={setDescription} status={status} setStatus={setStatus} priority={priority} setPriority={setPriority} dueDate={dueDate} setDueDate={setDueDate} projectId={projectId} setProjectId={setProjectId} projects={projects} handleSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   );
