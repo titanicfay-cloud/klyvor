@@ -18,6 +18,7 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
 
@@ -61,10 +62,21 @@ export default function ExpensesPage() {
     else { toast.success("Expense deleted."); setExpenses(expenses.filter(e => e.id !== id)); }
   };
 
-  const filtered = expenses.filter(e => 
-    e.vendor.toLowerCase().includes(search.toLowerCase()) || 
-    e.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = expenses.filter(e => {
+    const matchesSearch = e.vendor.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch && (categoryFilter === "all" || e.category === categoryFilter);
+  });
+  const categories = Array.from(new Set(expenses.map((e) => e.category))).sort();
+  const exportTaxCsv = () => {
+    const header = ["Date", "Vendor", "Category", "Description", "Amount", "Currency", "Status", "Amount Paid"];
+    const lines = [header, ...filtered.map((e) => [e.expense_date, e.vendor, e.category, e.description || "", e.amount, e.currency, e.payment_status, e.amount_paid])];
+    const csv = lines.map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const file = new Blob([csv], { type: "text/csv" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(file);
+    link.download = "klyvor-expenses.csv";
+    link.click();
+  };
 
   const getStatusColor = (status: string) => {
     if (status === 'paid') return "bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/30";
@@ -88,11 +100,16 @@ export default function ExpensesPage() {
 
       <ExpenseSummary expenses={expenses} />
 
-      <div className="flex bg-[#111A2E] p-3 rounded-xl border border-[#27344B]">
+      <div className="flex flex-col gap-3 bg-[#111A2E] p-3 rounded-xl border border-[#27344B] sm:flex-row sm:items-center">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" size={16} />
           <Input placeholder="Search by vendor or category..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 bg-[#0B1020] border-[#27344B] text-white h-10" />
         </div>
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="h-10 rounded-md border border-[#27344B] bg-[#0B1020] px-3 text-sm text-white">
+          <option value="all">All categories</option>
+          {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+        </select>
+        <Button type="button" onClick={exportTaxCsv} variant="outline" className="border-[#27344B] text-white">Export CSV</Button>
       </div>
 
       <div className="space-y-3">

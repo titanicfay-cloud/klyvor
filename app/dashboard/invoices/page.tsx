@@ -117,6 +117,31 @@ export default function InvoicesPage() {
     setIsSaving(false);
   };
 
+
+  const handleRepeatNextMonth = async (invoice: any, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const shift = (value: string) => {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      date.setMonth(date.getMonth() + 1);
+      return date.toISOString().split("T")[0];
+    };
+    const res = await saveInvoiceAction({
+      client_id: invoice.client_id,
+      project_id: invoice.project_id,
+      issue_date: shift(invoice.issue_date),
+      due_date: shift(invoice.due_date || invoice.issue_date),
+      status: "draft",
+      items_json: invoice.items_json || [],
+      tax_rate: invoice.tax_rate || 0,
+      discount_amount: invoice.discount_amount || 0,
+      currency: invoice.currency || "USD",
+      notes: invoice.notes || null,
+    });
+    if (res.error) toast.error(res.error);
+    else { toast.success("Next month's invoice created as a draft."); fetchData(); }
+  };
+
   const handlePrint = () => { window.print(); };
 
   if (loading) return <PageLoading />;
@@ -148,6 +173,7 @@ export default function InvoicesPage() {
               <div className="flex items-center gap-6">
                 <span className="text-lg font-mono text-white">{new Intl.NumberFormat("en-US", { style: "currency", currency: inv.currency }).format(inv.total_amount)}</span>
                 <span className={cn("text-xs font-bold uppercase px-2 py-1 rounded-full", inv.status === 'paid' ? 'bg-[#22C55E]/10 text-[#22C55E]' : inv.status === 'overdue' ? 'bg-[#EF4444]/10 text-[#EF4444]' : 'bg-[#F59E0B]/10 text-[#F59E0B]')}>{inv.status}</span>
+                <button type="button" onClick={(e) => handleRepeatNextMonth(inv, e)} className="text-xs font-semibold text-primary hover:text-white">Repeat next month</button>
               </div>
             </div>
           ))}

@@ -42,6 +42,8 @@ export default function ClientDetailsPage() {
 
   const [client, setClient] = useState<Client | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [clientInvoices, setClientInvoices] = useState<any[]>([]);
+  const [clientProposals, setClientProposals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Edit State
@@ -75,6 +77,10 @@ export default function ClientDetailsPage() {
 
     const { data: projectData } = await supabase.from("projects").select("*").eq("client_id", id).order("created_at", { ascending: false });
     setProjects(projectData || []);
+    const { data: invoiceData } = await supabase.from("invoices").select("id, invoice_number, status, total_amount, currency, issue_date").eq("client_id", id).order("created_at", { ascending: false });
+    setClientInvoices(invoiceData || []);
+    const { data: proposalData } = await supabase.from("proposals").select("id, title, status, total_amount, currency").eq("client_id", id).order("created_at", { ascending: false });
+    setClientProposals(proposalData || []);
 
     setLoading(false);
   };
@@ -209,6 +215,31 @@ export default function ClientDetailsPage() {
                       <p className="text-xs text-[#64748B]">{project.target_date ? `Due ${formatDate(project.target_date, "UTC", "DD/MM/YYYY")}` : "No deadline"}</p>
                       <span className="text-primary text-xs font-semibold flex items-center gap-1">View <ArrowRight size={14} /></span>
                     </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-[#0B1020] border border-[#27344B] rounded-2xl p-6">
+            <h2 className="text-xl font-bold text-white mb-4">Invoices</h2>
+            {clientInvoices.length === 0 ? <p className="text-sm text-[#64748B]">No invoices for this client yet.</p> : (
+              <div className="space-y-3">
+                {clientInvoices.map((inv) => (
+                  <Link key={inv.id} href="/dashboard/invoices" className="flex items-center justify-between rounded-xl border border-[#27344B] bg-[#111A2E] p-3 hover:border-primary/50">
+                    <span className="text-sm font-semibold text-white">{inv.invoice_number}</span>
+                    <span className="text-xs text-[#C7D0E0]">{inv.status} · {inv.currency} {Number(inv.total_amount || 0).toLocaleString()}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+            <h2 className="text-xl font-bold text-white mb-4 mt-8">Proposals</h2>
+            {clientProposals.length === 0 ? <p className="text-sm text-[#64748B]">No proposals for this client yet.</p> : (
+              <div className="space-y-3">
+                {clientProposals.map((p) => (
+                  <Link key={p.id} href="/dashboard/proposals" className="flex items-center justify-between rounded-xl border border-[#27344B] bg-[#111A2E] p-3 hover:border-primary/50">
+                    <span className="text-sm font-semibold text-white">{p.title || "Untitled"}</span>
+                    <span className="text-xs text-[#C7D0E0]">{p.status || "draft"}</span>
                   </Link>
                 ))}
               </div>
