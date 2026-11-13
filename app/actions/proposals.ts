@@ -1,22 +1,16 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getUserEntitlements } from "@/lib/entitlements";
+import { checkToolAccess } from "@/lib/entitlements";
 import { getOrCreateWorkspace } from "@/lib/workspace";
 
 export async function saveProposalAction(data: any) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  const entitlements = await getUserEntitlements(user.id);
-  if (entitlements.plan_id === "free" || entitlements.plan_id === "productivity") {
-    return {
-      error: "Proposal Studio requires the Professional plan or higher. Please upgrade.",
-    };
-  }
+  const access = await checkToolAccess(user.id, "proposals");
+  if (!access.allowed) return { error: access.message };
 
   const { workspaceId, error: wsError } = await getOrCreateWorkspace(user.id);
   if (wsError || !workspaceId) return { error: wsError || "Workspace error" };
@@ -34,24 +28,20 @@ export async function saveProposalAction(data: any) {
   };
 
   if (data.id) {
-    // Update existing proposal
     const { error } = await supabase
       .from("proposals")
       .update(payload)
       .eq("id", data.id)
       .eq("user_id", user.id);
-
     if (error) return { error: error.message };
     return { success: true, id: data.id };
-  } else {
-    // Create new proposal
-    const { data: newProp, error } = await supabase
-      .from("proposals")
-      .insert([payload])
-      .select()
-      .single();
-
-    if (error) return { error: error.message };
-    return { success: true, id: newProp.id };
   }
+
+  const { data: newProp, error } = await supabase
+    .from("proposals")
+    .insert([payload])
+    .select()
+    .single();
+  if (error) return { error: error.message };
+  return { success: true, id: newProp.id };
 }
