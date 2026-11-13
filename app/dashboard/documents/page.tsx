@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import DocumentList from "@/components/features/documents/DocumentList";
 import DocumentEditor from "@/components/features/documents/DocumentEditor";
+import { createDocumentAction } from "@/app/actions/documents";
 
 export default function DocumentsPage() {
   const supabase = createClient();
@@ -58,11 +59,14 @@ export default function DocumentsPage() {
   };
 
   const handleCreate = async (type: "quick_note" | "rich_document") => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data, error } = await supabase.from("documents").insert([{ user_id: user.id, title: type === "quick_note" ? "New Note" : "New Document", document_type: type }]).select().single();
-    if (error) toast.error("Could not create.");
-    else { setDocuments([data, ...documents]); setActiveDoc(data); setIsMobileEditorOpen(true); toast.success("Created."); }
+    const res = await createDocumentAction(type);
+    if (res.error) toast.error(res.error);
+    else if (res.data) {
+      setDocuments([res.data, ...documents]);
+      setActiveDoc(res.data);
+      setIsMobileEditorOpen(true);
+      toast.success("Created.");
+    }
   };
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
