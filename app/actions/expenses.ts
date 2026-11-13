@@ -19,6 +19,7 @@ export async function saveExpenseAction(data: any) {
   else if (amountPaid > 0) paymentStatus = "partial";
   else paymentStatus = "unpaid";
 
+  // expenses table has no user_id — ownership via created_by only
   const payload = {
     vendor: data.vendor,
     description: data.description || null,
@@ -30,11 +31,14 @@ export async function saveExpenseAction(data: any) {
     payment_status: paymentStatus,
     payment_method: data.payment_method || null,
     created_by: user.id,
-    user_id: user.id,
   };
 
   if (data.id) {
-    const { error } = await supabase.from("expenses").update(payload).eq("id", data.id);
+    const { error } = await supabase
+      .from("expenses")
+      .update(payload)
+      .eq("id", data.id)
+      .eq("created_by", user.id);
     if (error) return { error: error.message };
     return { success: true, id: data.id };
   }
@@ -52,7 +56,11 @@ export async function deleteExpenseAction(id: string) {
   const access = await checkToolAccess(user.id, "expenses");
   if (!access.allowed) return { error: access.message };
 
-  const { error } = await supabase.from("expenses").delete().eq("id", id);
+  const { error } = await supabase
+    .from("expenses")
+    .delete()
+    .eq("id", id)
+    .eq("created_by", user.id);
   if (error) return { error: error.message };
   return { success: true };
 }

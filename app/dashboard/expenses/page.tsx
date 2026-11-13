@@ -31,7 +31,7 @@ export default function ExpensesPage() {
       const { data } = await supabase
         .from("expenses")
         .select("*")
-        .or(`created_by.eq.\( {user.id},user_id.eq. \){user.id}`)
+        .eq("created_by", user.id)
         .order("expense_date", { ascending: false });
       setExpenses(data || []);
     } catch (err) {
