@@ -7,7 +7,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, Trash2, CheckSquare, FileText, Calendar, Clock, Loader2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, CheckSquare, FileText, Calendar, Clock, Receipt } from "lucide-react";
+import { PageLoading } from "@/components/ui/states";
 import { formatDate } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -25,6 +26,8 @@ export default function ProjectDetailsPage() {
   const [project, setProject] = useState<any>(null);
   const [tasks, setTasks] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [projectTimeEntries, setProjectTimeEntries] = useState<any[]>([]);
+  const [projectInvoices, setProjectInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Preferences
@@ -72,6 +75,12 @@ export default function ProjectDetailsPage() {
     const { data: docData } = await supabase.from("documents").select("*").eq("project_id", id).order("updated_at", { ascending: false });
     setDocuments(docData || []);
 
+    const { data: timeData } = await supabase.from("time_entries").select("*").eq("project_id", id).order("start_time", { ascending: false });
+    setProjectTimeEntries(timeData || []);
+
+    const { data: invData } = await supabase.from("invoices").select("id, invoice_number, status, total_amount, currency, issue_date").eq("project_id", id).order("created_at", { ascending: false });
+    setProjectInvoices(invData || []);
+
     setLoading(false);
   };
 
@@ -116,7 +125,7 @@ export default function ProjectDetailsPage() {
     return "bg-[#27344B] text-[#C7D0E0] border-[#27344B]";
   };
 
-  if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading project...</div>;
+  if (loading) return <PageLoading />;
   if (!project) return null;
 
   const completedTasks = tasks.filter(t => t.status === "completed").length;
@@ -232,6 +241,59 @@ export default function ProjectDetailsPage() {
           </div>
         </div>
 
+      </div>
+
+
+      {/* Time & Invoices */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-[#111A2E] border border-[#27344B] rounded-2xl p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2"><Clock size={18} className="text-primary" /> Time logged</h3>
+            <Link href="/dashboard/time-tracker" className="text-xs text-primary hover:text-white transition-colors">Open Time Tracker →</Link>
+          </div>
+          <div className="space-y-3 flex-grow">
+            {projectTimeEntries.length === 0 ? (
+              <p className="text-sm text-[#64748B] text-center py-8">No time logged on this project yet.</p>
+            ) : (
+              projectTimeEntries.slice(0, 8).map((entry) => {
+                const seconds = Number(entry.duration_seconds || 0);
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                return (
+                  <div key={entry.id} className="bg-[#0B1020] border border-[#27344B] p-3 rounded-lg flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm text-white truncate">{entry.description || "Time entry"}</p>
+                      <p className="text-[10px] text-[#64748B]">{entry.start_time ? formatDate(entry.start_time, timezone, dateFormat) : ""}</p>
+                    </div>
+                    <span className="text-sm font-mono font-semibold text-primary shrink-0">{h}h {m}m</span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        <div className="bg-[#111A2E] border border-[#27344B] rounded-2xl p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2"><Receipt size={18} className="text-secondary" /> Invoices</h3>
+            <Link href="/dashboard/invoices" className="text-xs text-secondary hover:text-white transition-colors">Open Invoices →</Link>
+          </div>
+          <div className="space-y-3 flex-grow">
+            {projectInvoices.length === 0 ? (
+              <p className="text-sm text-[#64748B] text-center py-8">No invoices linked to this project yet.</p>
+            ) : (
+              projectInvoices.map((inv) => (
+                <div key={inv.id} className="bg-[#0B1020] border border-[#27344B] p-3 rounded-lg flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm text-white truncate">{inv.invoice_number}</p>
+                    <p className="text-[10px] text-[#64748B] uppercase">{inv.status}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-white shrink-0">{inv.currency || "USD"} {Number(inv.total_amount || 0).toLocaleString()}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Edit Modal */}
