@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { checkToolAccess } from "@/lib/entitlements";
-import { getOrCreateWorkspace } from "@/lib/workspace";
 
 export async function saveProposalAction(data: any) {
   const supabase = await createClient();
@@ -12,12 +11,8 @@ export async function saveProposalAction(data: any) {
   const access = await checkToolAccess(user.id, "proposals");
   if (!access.allowed) return { error: access.message };
 
-  const { workspaceId, error: wsError } = await getOrCreateWorkspace(user.id);
-  if (wsError || !workspaceId) return { error: wsError || "Workspace error" };
-
   const payload = {
     user_id: user.id,
-    workspace_id: workspaceId,
     title: data.title,
     client_id: data.client_id || null,
     project_id: data.project_id || null,

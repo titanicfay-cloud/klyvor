@@ -1,7 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { checkToolAccess } from "@/lib/entitlements";
-import { getOrCreateWorkspace } from "@/lib/workspace";
 
 export async function saveExpenseAction(data: any) {
   const supabase = await createClient();
@@ -10,9 +9,6 @@ export async function saveExpenseAction(data: any) {
 
   const access = await checkToolAccess(user.id, "expenses");
   if (!access.allowed) return { error: access.message };
-
-  const { workspaceId, error: wsError } = await getOrCreateWorkspace(user.id);
-  if (wsError || !workspaceId) return { error: wsError || "Workspace error" };
 
   const amount = Number(data.amount);
   const amountPaid = Number(data.amount_paid || 0);
@@ -24,7 +20,6 @@ export async function saveExpenseAction(data: any) {
   else paymentStatus = "unpaid";
 
   const payload = {
-    workspace_id: workspaceId,
     vendor: data.vendor,
     description: data.description || null,
     category: data.category,
@@ -35,6 +30,7 @@ export async function saveExpenseAction(data: any) {
     payment_status: paymentStatus,
     payment_method: data.payment_method || null,
     created_by: user.id,
+    user_id: user.id,
   };
 
   if (data.id) {

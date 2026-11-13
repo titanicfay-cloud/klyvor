@@ -28,17 +28,11 @@ export default function ExpensesPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      let { data: member } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", user.id).maybeSingle();
-      if (!member) {
-        // Self-healing workspace
-        const { data: newWs } = await supabase.from("workspaces").insert([{ name: "My Workspace", type: "personal" }]).select().single();
-        if (newWs) {
-          await supabase.from("workspace_members").insert([{ workspace_id: newWs.id, user_id: user.id, role: 'owner' }]);
-          member = { workspace_id: newWs.id };
-        }
-      }
-
-      const { data } = await supabase.from("expenses").select("*").eq("workspace_id", member?.workspace_id).order("expense_date", { ascending: false });
+      const { data } = await supabase
+        .from("expenses")
+        .select("*")
+        .or(`created_by.eq.\( {user.id},user_id.eq. \){user.id}`)
+        .order("expense_date", { ascending: false });
       setExpenses(data || []);
     } catch (err) {
       toast.error("Failed to load expenses.");

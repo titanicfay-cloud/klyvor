@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { checkToolAccess } from "@/lib/entitlements";
-import { getOrCreateWorkspace } from "@/lib/workspace";
 
 export async function saveInvoiceAction(data: any) {
   const supabase = await createClient();
@@ -12,15 +11,12 @@ export async function saveInvoiceAction(data: any) {
   const access = await checkToolAccess(user.id, "invoices");
   if (!access.allowed) return { error: access.message };
 
-  const { workspaceId, error: wsError } = await getOrCreateWorkspace(user.id);
-  if (wsError || !workspaceId) return { error: wsError || "Workspace error" };
-
   if (data.client_id) {
     const { data: client } = await supabase
       .from("clients")
       .select("id")
       .eq("id", data.client_id)
-      .eq("workspace_id", workspaceId)
+      .eq("user_id", user.id)
       .single();
     if (!client) return { error: "Invalid client selection." };
   }
@@ -30,7 +26,7 @@ export async function saveInvoiceAction(data: any) {
       .from("projects")
       .select("id")
       .eq("id", data.project_id)
-      .eq("workspace_id", workspaceId)
+      .eq("user_id", user.id)
       .single();
     if (!project) return { error: "Invalid project selection." };
   }
@@ -45,16 +41,11 @@ export async function saveInvoiceAction(data: any) {
 
   let invoiceNumber = data.invoice_number;
   if (!data.id) {
-    const { data: generatedNumber, error: rpcError } = await supabase.rpc(
-      "generate_invoice_number",
-      { ws_id: workspaceId }
-    );
-    if (rpcError) return { error: "Failed to generate invoice number." };
-    invoiceNumber = generatedNumber;
+    invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
   }
 
-  const payload = {
-    workspace_id: workspaceId,
+  const payload: Record<string, any> = {
+    user_id: user.id,
     client_id: data.client_id || null,
     project_id: data.project_id || null,
     invoice_number: invoiceNumber,
@@ -72,7 +63,7 @@ export async function saveInvoiceAction(data: any) {
   };
 
   if (data.id) {
-    const { error } = await supabase.from("invoices").update(payload).eq("id", data.id);
+    const { error } = await supabase.from("invoices").update(payload).eq("id", data.id).eq("user_id", user.id);
     if (error) return { error: error.message };
     return { success: true, id: data.id };
   }

@@ -44,24 +44,10 @@ export default function InvoicesPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // SELF-HEALING WORKSPACE LOGIC
-      let { data: member } = await supabase.from("workspace_members").select("workspace_id").eq("user_id", user.id).maybeSingle();
-      
-      // If no workspace exists (e.g., a sync glitch), create one instantly
-      if (!member) {
-        const { data: newWs } = await supabase.from("workspaces").insert([{ name: "My Workspace", type: "personal" }]).select().single();
-        if (newWs) {
-          await supabase.from("workspace_members").insert([{ workspace_id: newWs.id, user_id: user.id, role: 'owner' }]);
-          member = { workspace_id: newWs.id };
-        } else {
-          throw new Error("Failed to create workspace.");
-        }
-      }
-
       const [invRes, clientRes, projRes] = await Promise.all([
-        supabase.from("invoices").select("*").eq("workspace_id", member.workspace_id).order("created_at", { ascending: false }),
-        supabase.from("clients").select("id, name").order("name"),
-        supabase.from("projects").select("id, name").order("name")
+        supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("clients").select("id, name").eq("user_id", user.id).order("name"),
+        supabase.from("projects").select("id, name").eq("user_id", user.id).order("name")
       ]);
 
       setInvoices(invRes.data || []);
@@ -69,10 +55,7 @@ export default function InvoicesPage() {
       setProjects(projRes.data || []);
     } catch (err: any) {
       console.error(err);
-      // Only show toast if it's a fatal error
-      if (err.message !== "Failed to create workspace.") {
-         toast.error("Something went wrong loading your data.");
-      }
+      toast.error("Something went wrong loading your data.");
     } finally {
       setLoading(false);
     }
