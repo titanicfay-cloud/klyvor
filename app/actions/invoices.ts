@@ -44,9 +44,8 @@ export async function saveInvoiceAction(data: any) {
     invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
   }
 
-  // invoices table has no user_id — ownership via created_by only
   const payload: Record<string, any> = {
-    created_by: user.id,
+    user_id: user.id,
     client_id: data.client_id || null,
     project_id: data.project_id || null,
     invoice_number: invoiceNumber,
@@ -68,7 +67,7 @@ export async function saveInvoiceAction(data: any) {
       .from("invoices")
       .update(payload)
       .eq("id", data.id)
-      .eq("created_by", user.id);
+      .eq("user_id", user.id);
     if (error) return { error: error.message };
     return { success: true, id: data.id };
   }

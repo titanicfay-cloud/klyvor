@@ -45,7 +45,7 @@ export default function InvoicesPage() {
       if (!user) return;
 
       const [invRes, clientRes, projRes] = await Promise.all([
-        supabase.from("invoices").select("*").eq("created_by", user.id).order("created_at", { ascending: false }),
+        supabase.from("invoices").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("clients").select("id, name").eq("user_id", user.id).order("name"),
         supabase.from("projects").select("id, name").eq("user_id", user.id).order("name")
       ]);
