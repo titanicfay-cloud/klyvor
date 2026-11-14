@@ -1,6 +1,7 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { checkToolAccess } from "@/lib/entitlements";
+import { notifyUser } from "@/lib/notify";
 
 export async function saveExpenseAction(data: any) {
   const supabase = await createClient();
@@ -45,6 +46,11 @@ export async function saveExpenseAction(data: any) {
 
   const { data: newExp, error } = await supabase.from("expenses").insert([payload]).select().single();
   if (error) return { error: error.message };
+  await notifyUser(user.id, {
+    title: "Expense recorded",
+    body: `${data.vendor} was saved.`,
+    link: "/dashboard/expenses",
+  });
   return { success: true, id: newExp.id };
 }
 

@@ -87,6 +87,9 @@ export default function InvoiceForm({ data, setData, clients, projects }: any) {
         <div className="space-y-2"><Label>Tax Rate (%)</Label><Input type="number" min="0" value={data.tax_rate} onChange={e => updateField("tax_rate", e.target.value)} className="bg-[#0B1020] border-[#27344B] text-white" /></div>
         <div className="space-y-2"><Label>Discount Amount</Label><Input type="number" min="0" value={data.discount_amount} onChange={e => updateField("discount_amount", e.target.value)} className="bg-[#0B1020] border-[#27344B] text-white" /></div>
       </div>
+      {Number(data.discount_amount || 0) > (data.items || []).reduce((sum: number, item: any) => sum + Number(item.quantity || 0) * Number(item.rate || 0), 0) && (
+        <p className="text-sm text-[#EF4444]">Discount is larger than the subtotal. Lower it before saving. Tax is applied after a valid discount.</p>
+      )}
 
       {/* Notes */}
       <div className="space-y-2">

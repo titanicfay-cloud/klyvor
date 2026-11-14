@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Shield, Users, LifeBuoy, ArrowLeft } from "lucide-react";
+import { Shield, Users, LifeBuoy, ArrowLeft, Bell } from "lucide-react";
 
 export default function AdminSidebar({ roleName, onNavigate }: { roleName: string, onNavigate?: () => void }) {
   return (
@@ -17,6 +17,9 @@ export default function AdminSidebar({ roleName, onNavigate }: { roleName: strin
       <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
         <Link href="/admin" onClick={onNavigate} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white transition-colors">
           <Shield size={18} /> {roleName === 'OWNER' ? 'Owner' : roleName === 'ADMIN' ? 'Admin' : 'Support'} Overview
+        </Link>
+        <Link href="/admin/notifications" onClick={onNavigate} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white transition-colors">
+          <Bell size={18} /> Messages
         </Link>
         <Link href="/admin/support" onClick={onNavigate} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white transition-colors">
           <LifeBuoy size={18} /> Support Tickets

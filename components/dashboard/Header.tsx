@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import UserDropdown from "./UserDropdown";
+import NotificationBell from "./NotificationBell";
 import { useState, useEffect } from "react";
 
 const getBreadcrumb = (path: string) => {
@@ -21,6 +22,7 @@ const getBreadcrumb = (path: string) => {
   if (path.includes("/proposals")) return "Professional / Proposals";
   if (path.includes("/resumes")) return "Professional / CV Builder";
   if (path.includes("/settings/billing")) return "Settings / Billing";
+  if (path.includes("/notifications")) return "Workspace / Notifications";
   if (path.includes("/settings")) return "Workspace / Settings";
   if (path.includes("/admin")) return "Staff / Admin";
   return "Workspace";
@@ -69,7 +71,8 @@ export default function Header({
           {getBreadcrumb(pathname)}
         </div>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <NotificationBell />
         <UserDropdown userEmail={userEmail} userName={userName} planId={planId} />
       </div>
     </header>

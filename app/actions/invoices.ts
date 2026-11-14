@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { checkToolAccess } from "@/lib/entitlements";
+import { notifyUser } from "@/lib/notify";
 
 export async function saveInvoiceAction(data: any) {
   const supabase = await createClient();
@@ -32,12 +33,25 @@ export async function saveInvoiceAction(data: any) {
   }
 
   const items = data.items_json || [];
+  for (const item of items) {
+    if (Number(item.quantity) < 0 || Number(item.rate) < 0) {
+      return { error: "Quantity and rate cannot be negative." };
+    }
+  }
   const subtotal = items.reduce(
     (acc: number, item: any) => acc + Number(item.quantity) * Number(item.rate),
     0
   );
-  const tax_amount = subtotal * (Number(data.tax_rate) / 100);
-  const total_amount = subtotal + tax_amount - Number(data.discount_amount || 0);
+  const discount = Number(data.discount_amount || 0);
+  const taxRate = Number(data.tax_rate || 0);
+  if (discount < 0) return { error: "Discount cannot be negative." };
+  if (taxRate < 0) return { error: "Tax rate cannot be negative." };
+  if (discount > subtotal) {
+    return { error: "Discount cannot be larger than the subtotal. Lower the discount or raise the line items." };
+  }
+  const taxable = subtotal - discount;
+  const tax_amount = taxable * (taxRate / 100);
+  const total_amount = taxable + tax_amount;
 
   let invoiceNumber = data.invoice_number;
   if (!data.id) {
@@ -78,5 +92,10 @@ export async function saveInvoiceAction(data: any) {
     .select()
     .single();
   if (error) return { error: error.message };
+  await notifyUser(user.id, {
+    title: "Invoice created",
+    body: `${invoiceNumber} was saved.`,
+    link: "/dashboard/invoices",
+  });
   return { success: true, id: newInv.id };
 }
