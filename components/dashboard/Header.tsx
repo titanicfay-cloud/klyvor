@@ -2,31 +2,41 @@
 
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { BadgeCheck, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import UserDropdown from "./UserDropdown";
 import NotificationBell from "./NotificationBell";
 import { useState, useEffect } from "react";
 
-const getBreadcrumb = (path: string) => {
-  if (path === "/dashboard") return "Workspace / Overview";
-  if (path.includes("/directory")) return "Workspace / Tool Directory";
-  if (path.includes("/tasks")) return "Daily Work / Tasks";
-  if (path.includes("/time-tracker")) return "Daily Work / Time Tracker";
-  if (path.includes("/documents")) return "Daily Work / Documents";
-  if (path.includes("/calculator")) return "Daily Work / Pricing Calculator";
-  if (path.includes("/projects")) return "Clients & Projects / Projects";
-  if (path.includes("/clients")) return "Clients & Projects / Clients";
-  if (path.includes("/invoices")) return "Money / Invoices";
-  if (path.includes("/expenses")) return "Money / Expenses";
-  if (path.includes("/proposals")) return "Professional / Proposals";
-  if (path.includes("/resumes")) return "Professional / CV Builder";
-  if (path.includes("/settings/billing")) return "Settings / Billing";
-  if (path.includes("/notifications")) return "Workspace / Notifications";
-  if (path.includes("/settings")) return "Workspace / Settings";
-  if (path.includes("/admin")) return "Staff / Admin";
-  return "Workspace";
+const PLAN_LABEL: Record<string, string> = {
+  free: "Free",
+  productivity: "Productivity",
+  professional: "Professional",
+  business: "Business",
+  all_access: "All-Access",
+  team: "Team",
+  business_plus: "Business Plus",
 };
+
+function pageInfo(path: string) {
+  if (path === "/dashboard") return { section: "Workspace", title: "Overview" };
+  if (path.includes("/directory")) return { section: "Workspace", title: "Tools" };
+  if (path.includes("/notifications")) return { section: "Workspace", title: "Alerts" };
+  if (path.includes("/tasks")) return { section: "Daily Work", title: "Tasks" };
+  if (path.includes("/time-tracker")) return { section: "Daily Work", title: "Time" };
+  if (path.includes("/documents")) return { section: "Daily Work", title: "Documents" };
+  if (path.includes("/calculator")) return { section: "Daily Work", title: "Pricing" };
+  if (path.includes("/calendar")) return { section: "Daily Work", title: "Calendar" };
+  if (path.includes("/projects")) return { section: "Work", title: "Projects" };
+  if (path.includes("/clients")) return { section: "Work", title: "Clients" };
+  if (path.includes("/invoices")) return { section: "Money", title: "Invoices" };
+  if (path.includes("/expenses")) return { section: "Money", title: "Expenses" };
+  if (path.includes("/proposals")) return { section: "Professional", title: "Proposals" };
+  if (path.includes("/resumes")) return { section: "Professional", title: "CV" };
+  if (path.includes("/settings/billing")) return { section: "Account", title: "Billing" };
+  if (path.includes("/settings")) return { section: "Account", title: "Settings" };
+  return { section: "Workspace", title: "KLYVOR" };
+}
 
 export default function Header({
   userEmail,
@@ -49,29 +59,38 @@ export default function Header({
 
   if (!mounted) return null;
 
+  const page = pageInfo(pathname);
+  const planName = PLAN_LABEL[planId] || "Free";
+  const isPremium = planId && planId !== "free";
+
   return (
-    <header className="h-20 border-b border-[#27344B] bg-[#0B1020]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between px-4 sm:px-8">
-      <div className="flex items-center gap-4">
-        <div className="lg:hidden">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-2 border-b border-[#27344B] bg-[#0B1020]/90 px-3 py-2 backdrop-blur-md sm:px-6">
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="lg:hidden shrink-0">
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-            <SheetTrigger className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:bg-[#111A2E]">
+            <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-white hover:bg-[#111A2E]">
               <Menu size={20} />
             </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 bg-[#0B1020] border-r-[#27344B]">
-              <Sidebar
-                isMobile={true}
-                role={role}
-                planId={planId}
-                onNavigate={() => setIsMobileOpen(false)}
-              />
+            <SheetContent side="left" className="w-72 border-r-[#27344B] bg-[#0B1020] p-0">
+              <Sidebar isMobile={true} role={role} planId={planId} onNavigate={() => setIsMobileOpen(false)} />
             </SheetContent>
           </Sheet>
         </div>
-        <div className="hidden sm:block text-sm font-medium text-[#64748B]">
-          {getBreadcrumb(pathname)}
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-[#64748B]">{page.section}</p>
+          <h1 className="truncate text-base font-bold text-white sm:text-lg">{page.title}</h1>
         </div>
       </div>
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+        <span className={`hidden items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${isPremium ? "border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF]" : "border-[#27344B] text-[#64748B]"}`}>
+          {isPremium && <BadgeCheck size={13} />}
+          {planName}
+        </span>
+        {isPremium && (
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF] sm:hidden" title={planName}>
+            <BadgeCheck size={16} />
+          </span>
+        )}
         <NotificationBell />
         <UserDropdown userEmail={userEmail} userName={userName} planId={planId} />
       </div>
