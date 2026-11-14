@@ -1,175 +1,176 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { PLAN_CONFIG, PlanId } from "@/lib/plans";
+import { PLAN_CONFIG, PlanId, TOOL_REQUIRED_PLAN, ToolId, canAccessTool } from "@/lib/plans";
 import { initializePaystackCheckout } from "@/app/actions/paystack";
 import { cancelSubscriptionAction } from "@/app/actions/billing";
 import { Button } from "@/components/ui/button";
+import { PageLoading } from "@/components/ui/states";
 import { toast } from "sonner";
-import { CheckCircle2, Loader2, ShieldCheck, Zap, Building2, Briefcase, GraduationCap, Crown, Users } from "lucide-react";
-import Link from "next/link";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
-const PLANS = [
-  { id: "free", name: "Free", price: 0, annual: 0, icon: GraduationCap, color: "text-[#64748B]", features: ["3 Projects", "3 Clients", "10 Documents"] },
-  { id: "productivity", name: "Productivity", price: 19, annual: 190, icon: Zap, color: "text-[#F59E0B]", features: ["Unlimited Projects", "Rich Text & Storage", "Calendar & Time Tracker"] },
-  { id: "professional", name: "Professional", price: 39, annual: 390, icon: Briefcase, color: "text-[#00D4FF]", features: ["Everything in Productivity", "20 Clients (CRM)"] },
-  { id: "business", name: "Business", price: 69, annual: 690, icon: Building2, color: "text-[#7C5CFC]", features: ["Everything in Professional", "Unlimited Clients"] },
-  { id: "all_access", name: "All-Access", price: 99, annual: 990, icon: ShieldCheck, color: "text-[#22C55E]", features: ["Everything in Business", "All Future AI Tools"] },
-  { id: "team", name: "Team", price: 149, annual: 1490, icon: Users, color: "text-[#F97316]", features: ["Everything in All-Access", "Shared Workspaces"] },
-  { id: "business_plus", name: "Business Plus", price: 299, annual: 2990, icon: Crown, color: "text-[#EAB308]", features: ["Everything in Team", "Advanced Org Controls"] },
+const ORDER: PlanId[] = ["free", "productivity", "professional", "business", "all_access", "team", "business_plus"];
+const PRICES: Record<PlanId, { month: number; year: number }> = {
+  free: { month: 0, year: 0 },
+  productivity: { month: 19, year: 190 },
+  professional: { month: 39, year: 390 },
+  business: { month: 69, year: 690 },
+  all_access: { month: 99, year: 990 },
+  team: { month: 149, year: 1490 },
+  business_plus: { month: 299, year: 2990 },
+};
+const NAMES: Record<PlanId, string> = {
+  free: "Free", productivity: "Productivity", professional: "Professional", business: "Business",
+  all_access: "All-Access", team: "Team", business_plus: "Business Plus",
+};
+const MEANT: Record<PlanId, string> = {
+  free: "Try the daily basics: tasks, notes, and price quotes.",
+  productivity: "For heavier writing and time tracking. Client and money tools stay locked.",
+  professional: "For client work: projects, clients, proposals, and a CV. No invoices yet.",
+  business: "For getting paid: invoices and expenses, plus unlimited clients.",
+  all_access: "The full solo plan. Same live tools as Business, with 10 GB for files.",
+  team: "Same live tools as All-Access, with 50 GB. Shared workspaces are not switched on yet.",
+  business_plus: "Same live tools, with 100 GB. Organisation controls are not switched on yet.",
+};
+const TOOLS: { id: ToolId; label: string }[] = [
+  { id: "tasks", label: "Tasks" },
+  { id: "documents", label: "Documents" },
+  { id: "calculator", label: "Pricing calculator" },
+  { id: "time-tracker", label: "Time tracker" },
+  { id: "projects", label: "Projects" },
+  { id: "clients", label: "Clients" },
+  { id: "proposals", label: "Proposals" },
+  { id: "resumes", label: "CV builder" },
+  { id: "invoices", label: "Invoices" },
+  { id: "expenses", label: "Expenses" },
 ];
+
+function cap(n: number) { return n >= 999999 ? "Unlimited" : String(n); }
+function storage(bytes: number) {
+  if (bytes <= 0) return "None";
+  const gb = bytes / (1024 * 1024 * 1024);
+  if (gb >= 1) return `${gb} GB`;
+  return `${Math.round(bytes / (1024 * 1024))} MB`;
+}
 
 export default function BillingPage() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
-  const [cancelLoading, setCancelLoading] = useState(false);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<string>("free");
+  const [annual, setAnnual] = useState(false);
+  const [plan, setPlan] = useState<PlanId>("free");
   const [usage, setUsage] = useState({ projects: 0, clients: 0, documents: 0 });
-  const [isAnnual, setIsAnnual] = useState(false); // Added toggle state
+  const [busy, setBusy] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  const load = async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-
-    const { data: sub } = await supabase.from("user_subscriptions").select("plan_id, status").eq("user_id", user.id).single();
-    const planId = (sub?.status === "active" ? sub?.plan_id : "free") || "free";
-    setCurrentPlan(planId);
-
-    const [projRes, clientRes, docRes] = await Promise.all([
+    const { data: sub } = await supabase.from("user_subscriptions").select("plan_id, status").eq("user_id", user.id).maybeSingle();
+    const current = (sub?.status === "active" ? sub.plan_id : "free") as PlanId;
+    setPlan(PLAN_CONFIG[current] ? current : "free");
+    const [projects, clients, documents] = await Promise.all([
       supabase.from("projects").select("*", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase.from("documents").select("*", { count: "exact", head: true }).eq("user_id", user.id)
+      supabase.from("documents").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     ]);
-
-    setUsage({ projects: projRes.count || 0, clients: clientRes.count || 0, documents: docRes.count || 0 });
+    setUsage({ projects: projects.count || 0, clients: clients.count || 0, documents: documents.count || 0 });
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [supabase]);
+  useEffect(() => { load(); }, []);
 
-  const handleUpgrade = async (planId: string, price: number) => {
-    setCheckoutLoading(planId);
-    // If annual is selected, pass the annual price to Paystack
-    const finalPrice = isAnnual ? PLANS.find(p => p.id === planId)?.annual || price : price;
-    const result = await initializePaystackCheckout(planId, finalPrice);
-    if (result.error) { toast.error(result.error); setCheckoutLoading(null); }
-    else if (result.url) { window.location.href = result.url; }
+  const limits = PLAN_CONFIG[plan];
+  const meter = (used: number, max: number) => {
+    const unlimited = max >= 999999;
+    const full = !unlimited && used >= max;
+    const width = unlimited ? 8 : Math.min(100, (used / Math.max(max, 1)) * 100);
+    return { label: `${used} / ${cap(max)}`, full, width };
   };
 
-  const handleCancel = async () => {
-    setCancelLoading(true);
+  const checkout = async (id: PlanId) => {
+    if (id === "free" || id === plan) return;
+    const price = annual ? PRICES[id].year : PRICES[id].month;
+    setBusy(id);
+    const result = await initializePaystackCheckout(id, price);
+    if (result.error) { toast.error(result.error); setBusy(null); }
+    else if (result.url) window.location.href = result.url;
+  };
+
+  const cancel = async () => {
+    if (!confirm("Cancel now? Paid tools lock and you return to Free limits.")) return;
+    setBusy("cancel");
     const result = await cancelSubscriptionAction();
-    if (result.error) { toast.error(result.error); }
-    else { toast.success("Subscription canceled."); setIsCancelModalOpen(false); fetchData(); }
-    setCancelLoading(false);
+    setBusy(null);
+    if (result.error) toast.error(result.error);
+    else { toast.success("Plan set back to Free."); load(); }
   };
 
-  if (loading) return <div className="p-8 text-white flex items-center gap-2"><Loader2 className="animate-spin" /> Loading billing info...</div>;
+  if (loading) return <PageLoading label="Loading billing..." />;
 
-  const activePlanData = PLANS.find(p => p.id === currentPlan) || PLANS[0];
-  const limits = PLAN_CONFIG[currentPlan as PlanId] || PLAN_CONFIG['free'];
-  const currentPrice = activePlanData.price;
+  const rows = [
+    { name: "Projects", ...meter(usage.projects, limits.max_projects), note: canAccessTool(plan, "projects") ? "Tool is open" : "Tool locked until Professional" },
+    { name: "Clients", ...meter(usage.clients, limits.max_clients), note: canAccessTool(plan, "clients") ? "Tool is open" : "Tool locked until Professional" },
+    { name: "Documents", ...meter(usage.documents, limits.max_documents), note: limits.can_use_rich_text ? "Rich documents on" : "Quick notes only" },
+  ];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10 pb-20 animate-in fade-in duration-500">
-      <div>
-        <Link href="/dashboard/settings" className="text-sm text-[#64748B] hover:text-white flex items-center gap-2 mb-4">← Back to Settings</Link>
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Billing & Plans</h1>
-        <p className="text-[#C7D0E0]">Manage your subscription and workspace limits.</p>
+    <div className="mx-auto max-w-3xl space-y-6 pb-24">
+      <Link href="/dashboard/settings" className="text-sm text-[#64748B]">Back to Settings</Link>
+      <div className="rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Your plan</p>
+        <h2 className="mt-1 text-2xl font-bold text-white">{NAMES[plan]}</h2>
+        <p className="mt-1 text-sm text-[#C7D0E0]">{MEANT[plan]}</p>
+        <p className="mt-3 text-sm text-white">Files: {limits.can_use_attachments ? storage(limits.max_storage_bytes) : "attachments off"} · Rich text: {limits.can_use_rich_text ? "on" : "off"}</p>
+        {plan !== "free" && <Button onClick={cancel} disabled={busy === "cancel"} variant="outline" className="mt-4 border-[#EF4444] text-[#EF4444]">{busy === "cancel" ? "Canceling..." : "Cancel and return to Free"}</Button>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#111A2E] border border-[#27344B] p-6 rounded-2xl md:col-span-1 flex flex-col justify-between">
-          <div>
-            <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-2">Current Plan</p>
-            <div className="flex items-center gap-3 mb-4">
-              <activePlanData.icon className={`w-8 h-8 ${activePlanData.color}`} />
-              <h2 className="text-2xl font-bold text-white">{activePlanData.name}</h2>
-            </div>
-            <p className="text-sm text-[#C7D0E0]">You are currently on the {activePlanData.name} tier.</p>
+      <div className="space-y-3 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Your limits right now</p>
+        {rows.map((row) => (
+          <div key={row.name}>
+            <div className="mb-1 flex justify-between text-sm"><span className="text-white">{row.name}</span><span className={row.full ? "text-[#EF4444]" : "text-[#C7D0E0]"}>{row.label}{row.full ? " · full" : ""}</span></div>
+            <div className="h-2 rounded-full bg-[#0B1020]"><div className={`h-2 rounded-full \( {row.full ? "bg-[#EF4444]" : "bg-[#00D4FF]"}`} style={{ width: ` \){row.width}%` }} /></div>
+            <p className="mt-1 text-xs text-[#64748B]">{row.note}</p>
           </div>
-          {currentPlan !== "free" ? (
-            <Button onClick={() => setIsCancelModalOpen(true)} variant="outline" className="w-full mt-6 border-[#EF4444] text-[#EF4444] hover:bg-[#EF4444]/10">Cancel Subscription</Button>
-          ) : (
-            <Button disabled className="w-full mt-6 bg-[#0B1020] border border-[#27344B] text-[#64748B]">Current Active Plan</Button>
-          )}
-        </div>
-
-        <div className="bg-[#111A2E] border border-[#27344B] p-6 rounded-2xl md:col-span-2">
-          <p className="text-xs font-semibold text-[#64748B] uppercase tracking-wider mb-4">Workspace Usage</p>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-1"><span className="text-white">Projects</span><span className="text-[#C7D0E0]">{usage.projects} / {limits.max_projects === 999999 ? 'Unlimited' : limits.max_projects}</span></div>
-              <div className="w-full bg-[#0B1020] rounded-full h-2"><div className="bg-primary h-2 rounded-full" style={{ width: `${Math.min((usage.projects / (limits.max_projects || 1)) * 100, 100)}%` }}></div></div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1"><span className="text-white">Clients</span><span className="text-[#C7D0E0]">{usage.clients} / {limits.max_clients === 999999 ? 'Unlimited' : limits.max_clients}</span></div>
-              <div className="w-full bg-[#0B1020] rounded-full h-2"><div className="bg-secondary h-2 rounded-full" style={{ width: `${Math.min((usage.clients / (limits.max_clients || 1)) * 100, 100)}%` }}></div></div>
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1"><span className="text-white">Documents</span><span className="text-[#C7D0E0]">{usage.documents} / {limits.max_documents === 999999 ? 'Unlimited' : limits.max_documents}</span></div>
-              <div className="w-full bg-[#0B1020] rounded-full h-2"><div className="bg-success h-2 rounded-full" style={{ width: `${Math.min((usage.documents / (limits.max_documents || 1)) * 100, 100)}%` }}></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-white">Available Upgrades</h2>
-          
-          {/* FIXED: Added Annual/Monthly Toggle */}
-          <div className="flex items-center gap-3 bg-[#111A2E] border border-[#27344B] p-1.5 rounded-full">
-            <button onClick={() => setIsAnnual(false)} className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${!isAnnual ? 'bg-primary text-[#0B1020]' : 'text-[#64748B] hover:text-white'}`}>Monthly</button>
-            <button onClick={() => setIsAnnual(true)} className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors ${isAnnual ? 'bg-primary text-[#0B1020]' : 'text-[#64748B] hover:text-white'}`}>Annual (Save 16.7%)</button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PLANS.filter(p => p.id !== currentPlan).map((plan) => {
-            const isDowngrade = plan.price < currentPrice;
-            const displayPrice = isAnnual ? plan.annual : plan.price;
-            const priceSuffix = isAnnual ? '/yr' : '/mo';
-
-            return (
-              <div key={plan.id} className="bg-[#0B1020] border border-[#27344B] p-6 rounded-2xl flex flex-col hover:border-primary/50 transition-colors">
-                <div className="flex justify-between items-start mb-4">
-                  <plan.icon className={`w-8 h-8 ${plan.color}`} />
-                  <span className="text-2xl font-bold text-white">${displayPrice}<span className="text-sm text-[#64748B] font-normal">{priceSuffix}</span></span>
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-                <ul className="space-y-3 mb-8 flex-grow">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-[#C7D0E0]"><CheckCircle2 size={16} className="text-primary shrink-0 mt-0.5" /> <span>{feature}</span></li>
-                  ))}
-                </ul>
-                <Button 
-                  onClick={() => handleUpgrade(plan.id, plan.price)} 
-                  disabled={checkoutLoading === plan.id}
-                  className={`w-full font-semibold ${isDowngrade ? 'bg-[#27344B] text-white hover:bg-[#334155]' : 'bg-white text-[#0B1020] hover:bg-gray-200'}`}
-                >
-                  {checkoutLoading === plan.id ? <Loader2 size={16} className="animate-spin" /> : isDowngrade ? `Downgrade to ${plan.name}` : `Upgrade to ${plan.name}`}
-                </Button>
-              </div>
-            );
+        ))}
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          {TOOLS.map((tool) => {
+            const open = canAccessTool(plan, tool.id);
+            return <p key={tool.id} className={`rounded-lg border px-3 py-2 text-xs ${open ? "border-[#22C55E]/30 text-[#22C55E]" : "border-[#27344B] text-[#64748B]"}`}>{tool.label}: {open ? "open" : `needs ${NAMES[TOOL_REQUIRED_PLAN[tool.id]]}`}</p>;
           })}
         </div>
       </div>
 
-      <Dialog open={isCancelModalOpen} onOpenChange={setIsCancelModalOpen}>
-        <DialogContent className="bg-[#0B1020] border-[#27344B] text-white sm:max-w-[400px]">
-          <DialogHeader><DialogTitle>Cancel Subscription?</DialogTitle><DialogDescription className="text-[#C7D0E0]">You will immediately lose access to premium features and revert to the Free plan limits.</DialogDescription></DialogHeader>
-          <DialogFooter className="pt-4">
-            <Button variant="ghost" onClick={() => setIsCancelModalOpen(false)} className="text-[#C7D0E0]">Keep Plan</Button>
-            <Button onClick={handleCancel} disabled={cancelLoading} className="bg-[#EF4444] text-white hover:bg-[#EF4444]/90">{cancelLoading ? "Canceling..." : "Yes, Cancel"}</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="flex gap-2">
+        <button onClick={() => setAnnual(false)} className={`rounded-full px-4 py-2 text-xs font-semibold ${!annual ? "bg-[#00D4FF] text-[#0B1020]" : "bg-[#111A2E] text-[#64748B]"}`}>Monthly</button>
+        <button onClick={() => setAnnual(true)} className={`rounded-full px-4 py-2 text-xs font-semibold ${annual ? "bg-[#00D4FF] text-[#0B1020]" : "bg-[#111A2E] text-[#64748B]"}`}>Yearly</button>
+      </div>
+
+      {ORDER.map((id) => {
+        const cfg = PLAN_CONFIG[id];
+        const price = annual ? PRICES[id].year : PRICES[id].month;
+        const current = id === plan;
+        return (
+          <article key={id} className={`rounded-2xl border p-5 ${current ? "border-[#00D4FF] bg-[#111A2E]" : "border-[#27344B] bg-[#0B1020]"}`}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-bold text-white">{NAMES[id]}{current ? " · current" : ""}</h3>
+                <p className="mt-1 text-sm text-[#C7D0E0]">{MEANT[id]}</p>
+              </div>
+              <p className="text-xl font-bold text-white">{price === 0 ? "$0" : `$${price}`}<span className="text-xs font-normal text-[#64748B]">{price === 0 ? "" : annual ? "/yr" : "/mo"}</span></p>
+            </div>
+            <ul className="mt-4 space-y-1 text-sm text-[#C7D0E0]">
+              <li>Projects {cap(cfg.max_projects)} · Clients {cap(cfg.max_clients)} · Documents {cap(cfg.max_documents)}</li>
+              <li>Rich text {cfg.can_use_rich_text ? "on" : "off"} · Attachments {cfg.can_use_attachments ? storage(cfg.max_storage_bytes) : "off"}</li>
+              <li>Opens: {TOOLS.filter((tool) => canAccessTool(id, tool.id)).map((tool) => tool.label).join(", ")}</li>
+            </ul>
+            <Button onClick={() => checkout(id)} disabled={current || id === "free" || busy === id} className="mt-4 w-full bg-white text-[#0B1020] disabled:bg-[#27344B] disabled:text-[#64748B]">
+              {current ? "Current plan" : id === "free" ? "Included" : busy === id ? "Opening checkout..." : `Pay for ${NAMES[id]}`}
+            </Button>
+          </article>
+        );
+      })}
     </div>
   );
 }

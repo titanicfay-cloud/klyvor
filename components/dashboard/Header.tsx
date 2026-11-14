@@ -2,7 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { BadgeCheck, Menu } from "lucide-react";
+import Link from "next/link";
+import { BadgeCheck, Calendar, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import UserDropdown from "./UserDropdown";
 import NotificationBell from "./NotificationBell";
@@ -82,6 +83,9 @@ export default function Header({
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+        <Link href="/dashboard/calendar" title="Calendar" className={`inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-[#111A2E] ${pathname.includes("/calendar") ? "text-[#00D4FF]" : "text-[#C7D0E0]"}`}>
+          <Calendar size={18} />
+        </Link>
         <span className={`hidden items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${isPremium ? "border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF]" : "border-[#27344B] text-[#64748B]"}`}>
           {isPremium && <BadgeCheck size={13} />}
           {planName}
