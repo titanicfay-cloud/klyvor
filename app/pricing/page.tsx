@@ -1,82 +1,110 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import Link from "next/link";
-import { CheckCircle2, Zap, Briefcase, Building2, ShieldCheck, Users, Crown, GraduationCap } from "lucide-react";
 
 const PLANS = [
-  { id: "free", name: "Free", price: 0, annual: 0, icon: GraduationCap, color: "text-[#64748B]", features: ["3 Active Projects", "3 Clients", "10 Documents", "Basic Notes"] },
-  { id: "productivity", name: "Productivity", price: 19, annual: 190, icon: Zap, color: "text-[#F59E0B]", features: ["Unlimited Projects", "Unlimited Documents", "Rich Text Editor", "500MB Storage"] },
-  { id: "professional", name: "Professional", price: 39, annual: 390, icon: Briefcase, color: "text-[#00D4FF]", features: ["Everything in Productivity", "20 Clients", "2GB Storage", "Advanced Document Types"] },
-  { id: "business", name: "Business", price: 69, annual: 690, icon: Building2, color: "text-[#7C5CFC]", features: ["Everything in Professional", "Unlimited Clients", "5GB Storage", "Client CRM"] },
-  { id: "all_access", name: "All-Access", price: 99, annual: 990, icon: ShieldCheck, color: "text-[#22C55E]", features: ["Everything in Business", "10GB Storage", "Priority Support", "All Future AI Tools"] },
-  { id: "team", name: "Team", price: 149, annual: 1490, icon: Users, color: "text-[#F97316]", features: ["Everything in All-Access", "Shared Workspaces", "Team Permissions", "50GB Storage"] },
-  { id: "business_plus", name: "Business Plus", price: 299, annual: 2990, icon: Crown, color: "text-[#EAB308]", features: ["Everything in Team", "Advanced Organization Controls", "SSO", "100GB Storage"] },
+  {
+    id: "free",
+    name: "Free",
+    month: 0,
+    year: 0,
+    meant: "Try the daily basics: tasks, notes, and price quotes.",
+    points: ["Tasks, documents, and the pricing calculator", "10 documents, quick notes only", "No file attachments", "Projects, clients, invoices, and expenses stay locked"],
+  },
+  {
+    id: "productivity",
+    name: "Productivity",
+    month: 19,
+    year: 190,
+    meant: "For heavier writing and time tracking. Client and money tools stay locked.",
+    points: ["Time tracker opens", "Unlimited documents and rich text", "500 MB for files", "Projects, clients, proposals, and CV stay locked"],
+  },
+  {
+    id: "professional",
+    name: "Professional",
+    month: 39,
+    year: 390,
+    meant: "For client work: projects, clients, proposals, and a CV. No invoices yet.",
+    points: ["Projects, clients, proposals, and CV builder", "Up to 20 clients", "Unlimited projects and documents", "2 GB for files"],
+  },
+  {
+    id: "business",
+    name: "Business",
+    month: 69,
+    year: 690,
+    meant: "For getting paid: invoices and expenses, plus unlimited clients.",
+    points: ["Invoices and expenses open", "Unlimited clients", "Same writing and project tools as Professional", "5 GB for files"],
+  },
+  {
+    id: "all_access",
+    name: "All-Access",
+    month: 99,
+    year: 990,
+    meant: "The full solo plan. Same live tools as Business, with 10 GB for files.",
+    points: ["Same tools as Business", "10 GB for files", "No extra tools beyond Business", "Shared workspaces are not included"],
+  },
+  {
+    id: "team",
+    name: "Team",
+    month: 149,
+    year: 1490,
+    meant: "Same live tools as All-Access, with 50 GB. Shared workspaces are not switched on yet.",
+    points: ["Same tools as All-Access", "50 GB for files", "Shared workspaces are not live", "Team permissions are not live"],
+  },
+  {
+    id: "business_plus",
+    name: "Business Plus",
+    month: 299,
+    year: 2990,
+    meant: "Same live tools, with 100 GB. Organisation controls are not switched on yet.",
+    points: ["Same tools as All-Access", "100 GB for files", "SSO is not live", "Organisation controls are not live"],
+  },
 ];
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [annual, setAnnual] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B1020]">
       <Navbar />
-      <main className="flex-grow pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Simple, transparent pricing.</h1>
-          <p className="text-lg text-[#C7D0E0] mb-10">Start for free, then scale your workspace as you grow.</p>
-          
-          <div className="flex items-center justify-center gap-4">
-            <span className={`text-sm font-medium ${!isAnnual ? 'text-white' : 'text-[#64748B]'}`}>Monthly</span>
-            <button 
-              onClick={() => setIsAnnual(!isAnnual)}
-              className="w-14 h-8 rounded-full bg-[#111A2E] border border-[#27344B] p-1 flex items-center transition-colors relative"
-            >
-              <div className={`w-6 h-6 rounded-full bg-klyvor-gradient transition-transform ${isAnnual ? 'translate-x-6' : 'translate-x-0'}`} />
-            </button>
-            <span className={`text-sm font-medium ${isAnnual ? 'text-white' : 'text-[#64748B]'}`}>
-              Annually <span className="text-primary text-xs ml-1 font-bold">(Save 16.7% / 2 Months Free)</span>
-            </span>
+      <main className="flex-grow px-4 pb-20 pt-32 sm:px-6 lg:px-8">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
+          <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl">Pricing</h1>
+          <p className="text-lg text-[#C7D0E0]">
+            Each paid tier adds real tools. Team and Business Plus only add file space until shared work is switched on.
+          </p>
+          <div className="mt-8 flex justify-center gap-2">
+            <button onClick={() => setAnnual(false)} className={!annual ? "rounded-full bg-[#00D4FF] px-4 py-2 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-4 py-2 text-xs font-semibold text-[#64748B]"}>Monthly</button>
+            <button onClick={() => setAnnual(true)} className={annual ? "rounded-full bg-[#00D4FF] px-4 py-2 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-4 py-2 text-xs font-semibold text-[#64748B]"}>Yearly</button>
           </div>
+          <p className="mt-3 text-xs text-[#64748B]">Yearly is ten months of the monthly price.</p>
         </div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center">
-          {PLANS.map((plan) => (
-            <div key={plan.id} className="bg-[#111A2E] border border-[#27344B] p-6 rounded-2xl flex flex-col hover:border-primary/50 transition-colors">
-              <plan.icon className={`w-8 h-8 mb-4 ${plan.color}`} />
-              <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-              
-              <div className="flex items-baseline gap-1 mb-2">
-                <span className="text-4xl font-bold text-white">${isAnnual ? plan.annual : plan.price}</span>
-                <span className="text-sm text-[#64748B]">/{isAnnual ? 'yr' : 'mo'}</span>
-              </div>
-              
-              {isAnnual && plan.price > 0 ? (
-                <p className="text-xs text-[#22C55E] mb-6">${(plan.annual / 12).toFixed(2)}/mo billed annually</p>
-              ) : (
-                <p className="text-xs text-[#64748B] mb-6">Billed monthly</p>
-              )}
-
-              <ul className="space-y-3 mb-8 flex-grow">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-[#C7D0E0]">
-                    <CheckCircle2 size={16} className="text-primary shrink-0 mt-0.5" /> <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link href="/signup" className="w-full block mt-auto">
-                <button className={`w-full py-3 rounded-xl font-semibold transition-colors ${plan.id === 'free' ? 'bg-[#27344B] text-white hover:bg-[#334155]' : 'bg-klyvor-gradient text-white hover:opacity-90'}`}>
-                  {plan.id === 'free' ? 'Start for Free' : `Choose ${plan.name}`}
-                </button>
-              </Link>
-            </div>
-          ))}
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-2">
+          {PLANS.map((plan) => {
+            const price = annual ? plan.year : plan.month;
+            return (
+              <article key={plan.id} className="flex flex-col rounded-2xl border border-[#27344B] bg-[#111A2E] p-6">
+                <h2 className="text-xl font-bold text-white">{plan.name}</h2>
+                <p className="mt-2 text-3xl font-bold text-white">{price === 0 ? "$0" : "$" + price}<span className="text-sm font-normal text-[#64748B]">{price === 0 ? "" : annual ? " / year" : " / month"}</span></p>
+                <p className="mt-3 text-sm text-[#C7D0E0]">{plan.meant}</p>
+                <ul className="mt-4 flex-grow space-y-2 text-sm text-[#C7D0E0]">
+                  {plan.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+                <Link href="/signup" className="mt-6 block rounded-xl bg-white py-3 text-center text-sm font-semibold text-[#0B1020]">
+                  {plan.id === "free" ? "Start free" : "Create account, then choose this plan"}
+                </Link>
+              </article>
+            );
+          })}
         </div>
       </main>
       <Footer />
     </div>
   );
-}
+      }
