@@ -82,7 +82,7 @@ export default function SettingsPage() {
   };
 
   const signOutOthers = async () => {
-    if (!confirm("This signs you out on every device, including this one.")) return;
+    if (!window.confirm("This signs you out on every device, including this one.")) return;
     const { error } = await supabase.auth.signOut({ scope: "global" });
     if (error) toast.error(error.message);
     else window.location.href = "/login";
