@@ -18,6 +18,26 @@ const TABS = [
   { id: "data", label: "Your data", icon: Download },
 ];
 
+const VALID_TIMEZONES = [
+  "Africa/Lagos",
+  "Africa/Johannesburg",
+  "Africa/Nairobi",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Asia/Dubai",
+  "Asia/Karachi",
+  "Asia/Kolkata",
+  "Asia/Shanghai",
+  "Asia/Singapore",
+  "Australia/Sydney",
+  "Europe/Berlin",
+  "Europe/London",
+  "Europe/Paris",
+  "UTC",
+];
+
 export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
@@ -26,9 +46,10 @@ export default function SettingsPage() {
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
   const [fullName, setFullName] = useState("");
+  const [planName, setPlanName] = useState("");
   const [savingName, setSavingName] = useState(false);
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
   const [timezone, setTimezone] = useState("UTC");
   const [dateFormat, setDateFormat] = useState("DD/MM/YYYY");
@@ -45,6 +66,14 @@ export default function SettingsPage() {
       setEmail(user.email || "");
       setUserId(user.id);
       setFullName(user.user_metadata?.full_name || "");
+
+      const { data: sub } = await supabase
+        .from("user_subscriptions")
+        .select("plan_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setPlanName(sub?.plan_id || "free");
+
       const { data: prefs } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle();
       if (prefs) {
         setTimezone(prefs.timezone || "UTC");
@@ -73,12 +102,12 @@ export default function SettingsPage() {
 
   const savePassword = async () => {
     if (password.length < 8) return toast.error("Use at least 8 characters.");
-    if (password !== confirm) return toast.error("Passwords do not match.");
+    if (password !== confirmPassword) return toast.error("Passwords do not match.");
     setSavingPassword(true);
     const { error } = await supabase.auth.updateUser({ password });
     setSavingPassword(false);
     if (error) toast.error(error.message);
-    else { toast.success("Password updated."); setPassword(""); setConfirm(""); }
+    else { toast.success("Password updated."); setPassword(""); setConfirmPassword(""); }
   };
 
   const signOutOthers = async () => {
@@ -89,6 +118,9 @@ export default function SettingsPage() {
   };
 
   const savePrefs = async () => {
+    if (!VALID_TIMEZONES.includes(timezone)) {
+      return toast.error("Choose a timezone from the list.");
+    }
     setSavingPrefs(true);
     const { error } = await supabase.from("user_preferences").update({
       timezone,
@@ -109,7 +141,7 @@ export default function SettingsPage() {
     };
     const payload = {
       exported_at: new Date().toISOString(),
-      profile: { name: fullName, email, user_id: userId },
+      profile: { name: fullName, email, user_id: userId, plan: planName },
       preferences: { timezone, dateFormat, productUpdates, tipsGuidance },
       tasks: await pull("tasks", "user_id"),
       documents: await pull("documents", "user_id"),
@@ -148,6 +180,11 @@ export default function SettingsPage() {
       {tab === "profile" && (
         <section className="space-y-4 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
           <h2 className="text-lg font-bold text-white">Profile</h2>
+          <div className="rounded-xl border border-[#27344B] bg-[#0B1020] p-4">
+            <p className="text-xs uppercase text-[#64748B]">Current plan</p>
+            <p className="mt-1 text-sm font-semibold text-white capitalize">{planName.replace("_", " ")}</p>
+            <Link href="/dashboard/settings/billing" className="mt-2 inline-block text-xs text-[#00D4FF]">Manage billing and usage</Link>
+          </div>
           <label className="block text-sm text-[#C7D0E0]">Name<input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1 h-11 w-full rounded-md border border-[#27344B] bg-[#0B1020] px-3 text-white" /></label>
           <label className="block text-sm text-[#C7D0E0]">Login email<input value={email} disabled className="mt-1 h-11 w-full rounded-md border border-[#27344B] bg-[#0B1020] px-3 text-[#64748B]" /></label>
           <p className="text-xs text-[#64748B]">Email is your login. It is not editable here.</p>
@@ -159,8 +196,11 @@ export default function SettingsPage() {
       {tab === "security" && (
         <section className="space-y-4 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
           <h2 className="text-lg font-bold text-white">Password</h2>
-          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" className="border-[#27344B] bg-[#0B1020] text-white" />
-          <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm password" className="border-[#27344B] bg-[#0B1020] text-white" />
+          <div>
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" className="border-[#27344B] bg-[#0B1020] text-white" />
+            <p className="mt-1 text-xs text-[#64748B]">Use at least 8 characters.</p>
+          </div>
+          <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className="border-[#27344B] bg-[#0B1020] text-white" />
           <Button onClick={savePassword} disabled={savingPassword} className="bg-klyvor-gradient text-white">{savingPassword ? "Updating..." : "Update password"}</Button>
           <Button onClick={signOutOthers} variant="outline" className="border-[#EF4444] text-[#EF4444]">Sign out every device</Button>
         </section>
@@ -169,7 +209,12 @@ export default function SettingsPage() {
       {tab === "preferences" && (
         <section className="space-y-4 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
           <h2 className="text-lg font-bold text-white">Preferences</h2>
-          <label className="block text-sm text-[#C7D0E0]">Timezone<input value={timezone} onChange={(e) => setTimezone(e.target.value)} className="mt-1 h-11 w-full rounded-md border border-[#27344B] bg-[#0B1020] px-3 text-white" placeholder="Africa/Lagos" /></label>
+          <label className="block text-sm text-[#C7D0E0]">Timezone
+            <input list="timezone-list" value={timezone} onChange={(e) => setTimezone(e.target.value)} className="mt-1 h-11 w-full rounded-md border border-[#27344B] bg-[#0B1020] px-3 text-white" placeholder="Africa/Lagos" />
+            <datalist id="timezone-list">
+              {VALID_TIMEZONES.map((tz) => <option key={tz} value={tz} />)}
+            </datalist>
+          </label>
           <label className="block text-sm text-[#C7D0E0]">Date format
             <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} className="mt-1 h-11 w-full rounded-md border border-[#27344B] bg-[#0B1020] px-3 text-white">
               <option>DD/MM/YYYY</option>
@@ -192,6 +237,7 @@ export default function SettingsPage() {
               <p className="font-semibold text-white">{ticket.subject || "Ticket"}</p>
               <p className="mt-1 text-sm text-[#C7D0E0]">{ticket.message}</p>
               <p className="mt-2 text-xs uppercase text-[#64748B]">{ticket.status || "open"}</p>
+              <p className="mt-1 text-xs text-[#64748B]">Opened {new Date(ticket.created_at).toLocaleDateString()}</p>
             </div>
           ))}
         </section>
@@ -201,9 +247,11 @@ export default function SettingsPage() {
         <section className="space-y-4 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
           <h2 className="text-lg font-bold text-white">Download your data</h2>
           <p className="text-sm text-[#C7D0E0]">A JSON file of your profile, tasks, documents, quotes, projects, clients, invoices, expenses, proposals, CVs, time entries, and tickets.</p>
+          <p className="text-xs text-[#64748B]">Attachments are not included. Export date: {new Date().toLocaleDateString()}</p>
           <Button onClick={exportData} disabled={exporting} className="bg-white text-[#0B1020]">{exporting ? "Preparing..." : "Export JSON"}</Button>
         </section>
       )}
     </div>
   );
-}
+    }
+      
