@@ -29,14 +29,49 @@ const NAMES: Record<PlanId, string> = {
   team: "Team",
   business_plus: "Business Plus",
 };
-const MEANT: Record<PlanId, string> = {
-  free: "Try the daily basics: tasks, notes, and price quotes.",
-  productivity: "For heavier writing and time tracking. Client and money tools stay locked.",
-  professional: "For client work: projects, clients, proposals, and a CV. No invoices yet.",
-  business: "For getting paid: invoices and expenses, plus unlimited clients.",
-  all_access: "The full solo plan. Same live tools as Business, with 10 GB for files.",
-  team: "Same live tools as All-Access, with 50 GB. Shared workspaces are not switched on yet.",
-  business_plus: "Same live tools, with 100 GB. Organisation controls are not switched on yet.",
+const DETAIL: Record<PlanId, { meant: string; opens: string[]; limits: string[]; closed: string[] }> = {
+  free: {
+    meant: "Tasks, documents, and fee calculations. Client records and billing remain closed.",
+    opens: ["Tasks", "Documents", "Pricing calculator"],
+    limits: ["10 documents", "Plain notes", "No file uploads"],
+    closed: ["Time tracker", "Projects", "Clients", "Proposals", "CV", "Invoices", "Expenses"],
+  },
+  productivity: {
+    meant: "Time records, formatted documents, and file uploads. Client work remains closed.",
+    opens: ["Time tracker", "Rich text", "File uploads"],
+    limits: ["Unlimited documents", "500 MB storage"],
+    closed: ["Projects", "Clients", "Proposals", "CV", "Invoices", "Expenses"],
+  },
+  professional: {
+    meant: "Projects, client records, proposals, and a CV. Invoices remain closed.",
+    opens: ["Projects", "Clients", "Proposals", "CV builder"],
+    limits: ["Unlimited projects and documents", "20 clients", "2 GB storage"],
+    closed: ["Invoices", "Expenses"],
+  },
+  business: {
+    meant: "Invoices and expense records, with no client cap.",
+    opens: ["Invoices", "Expenses"],
+    limits: ["Unlimited clients", "5 GB storage", "Every live solo tool"],
+    closed: ["Shared workspaces", "Role permissions", "SSO"],
+  },
+  all_access: {
+    meant: "The same live tools as Business, with 10 GB of storage.",
+    opens: ["No additional tool beyond Business"],
+    limits: ["10 GB storage"],
+    closed: ["Shared workspaces", "Model-assisted drafting", "A separate support queue"],
+  },
+  team: {
+    meant: "The same live tools as All-Access, with 50 GB. Shared work is not available.",
+    opens: ["No additional tool"],
+    limits: ["50 GB storage"],
+    closed: ["Shared workspaces", "Role permissions"],
+  },
+  business_plus: {
+    meant: "The same live tools, with 100 GB. Organisation controls are not available.",
+    opens: ["No additional tool"],
+    limits: ["100 GB storage"],
+    closed: ["SSO", "Organisation controls"],
+  },
 };
 const TOOLS: { id: ToolId; label: string }[] = [
   { id: "tasks", label: "Tasks" },
@@ -54,12 +89,26 @@ const TOOLS: { id: ToolId; label: string }[] = [
 function cap(n: number) {
   return n >= 999999 ? "Unlimited" : String(n);
 }
-
 function storage(bytes: number) {
   if (bytes <= 0) return "None";
   const gb = bytes / (1024 * 1024 * 1024);
   if (gb >= 1) return gb + " GB";
   return Math.round(bytes / (1024 * 1024)) + " MB";
+}
+function Group({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div>
+      <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#64748B]">{title}</h3>
+      <ul className="mt-2 space-y-1.5">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2 text-sm leading-5 text-[#C7D0E0]">
+            <span className="text-[#00D4FF]">•</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 export default function BillingPage() {
@@ -106,81 +155,107 @@ export default function BillingPage() {
   };
 
   const cancel = async () => {
-    if (!confirm("Cancel now? Paid tools lock and you return to Free limits.")) return;
+    if (!window.confirm("End this plan now? Paid tools close and the account returns to Free limits.")) return;
     setBusy("cancel");
     const result = await cancelSubscriptionAction();
     setBusy(null);
     if (result.error) toast.error(result.error);
-    else { toast.success("Plan set back to Free."); load(); }
+    else { toast.success("Plan returned to Free."); load(); }
   };
 
   if (loading) return <PageLoading label="Loading billing..." />;
 
   const rows = [
-    { name: "Projects", ...meter(usage.projects, limits.max_projects), note: canAccessTool(plan, "projects") ? "Tool is open" : "Tool locked until Professional" },
-    { name: "Clients", ...meter(usage.clients, limits.max_clients), note: canAccessTool(plan, "clients") ? "Tool is open" : "Tool locked until Professional" },
-    { name: "Documents", ...meter(usage.documents, limits.max_documents), note: limits.can_use_rich_text ? "Rich documents on" : "Quick notes only" },
+    { name: "Projects", ...meter(usage.projects, limits.max_projects), note: canAccessTool(plan, "projects") ? "Open on this plan" : "Closed until Professional" },
+    { name: "Clients", ...meter(usage.clients, limits.max_clients), note: canAccessTool(plan, "clients") ? "Open on this plan" : "Closed until Professional" },
+    { name: "Documents", ...meter(usage.documents, limits.max_documents), note: limits.can_use_rich_text ? "Rich text is available" : "Plain notes only" },
   ];
+  const detail = DETAIL[plan];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 pb-24">
-      <Link href="/dashboard/settings" className="text-sm text-[#64748B]">Back to Settings</Link>
-      <div className="rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Your plan</p>
-        <h2 className="mt-1 text-2xl font-bold text-white">{NAMES[plan]}</h2>
-        <p className="mt-1 text-sm text-[#C7D0E0]">{MEANT[plan]}</p>
-        <p className="mt-3 text-sm text-white">Files: {limits.can_use_attachments ? storage(limits.max_storage_bytes) : "attachments off"} · Rich text: {limits.can_use_rich_text ? "on" : "off"}</p>
-        {plan !== "free" && <Button onClick={cancel} disabled={busy === "cancel"} variant="outline" className="mt-4 border-[#EF4444] text-[#EF4444]">{busy === "cancel" ? "Canceling..." : "Cancel and return to Free"}</Button>}
+    <div className="mx-auto max-w-3xl space-y-8 pb-24" style={{ fontFamily: "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif" }}>
+      <div>
+        <Link href="/dashboard/settings" className="text-sm text-[#64748B]">Settings</Link>
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#00D4FF]">Account</p>
+        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-white">Billing</h1>
       </div>
 
-      <div className="space-y-3 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Your limits right now</p>
+      <section className="rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#64748B]">Current plan</p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">{NAMES[plan]}</h2>
+        <p className="mt-2 text-sm leading-6 text-[#C7D0E0]">{detail.meant}</p>
+        <p className="mt-3 text-sm text-white">Storage {limits.can_use_attachments ? storage(limits.max_storage_bytes) : "off"} · Rich text {limits.can_use_rich_text ? "on" : "off"}</p>
+        <div className="mt-5 space-y-4">
+          <Group title="Opens" items={detail.opens} />
+          <Group title="Limits" items={detail.limits} />
+          <Group title="Not included" items={detail.closed} />
+        </div>
+        {plan !== "free" && (
+          <Button onClick={cancel} disabled={busy === "cancel"} variant="outline" className="mt-5 border-[#EF4444] text-[#EF4444]">
+            {busy === "cancel" ? "Ending plan..." : "End plan and return to Free"}
+          </Button>
+        )}
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-[#27344B] bg-[#111A2E] p-5">
+        <h2 className="text-lg font-semibold text-white">Recorded use</h2>
         {rows.map((row) => (
           <div key={row.name}>
-            <div className="mb-1 flex justify-between text-sm"><span className="text-white">{row.name}</span><span className={row.full ? "text-[#EF4444]" : "text-[#C7D0E0]"}>{row.label}{row.full ? " · full" : ""}</span></div>
+            <div className="mb-1 flex justify-between text-sm">
+              <span className="font-medium text-white">{row.name}</span>
+              <span className={row.full ? "text-[#EF4444]" : "text-[#C7D0E0]"}>{row.label}{row.full ? " · at limit" : ""}</span>
+            </div>
             <div className="h-2 rounded-full bg-[#0B1020]">
               <div className={row.full ? "h-2 rounded-full bg-[#EF4444]" : "h-2 rounded-full bg-[#00D4FF]"} style={{ width: row.width + "%" }} />
             </div>
             <p className="mt-1 text-xs text-[#64748B]">{row.note}</p>
           </div>
         ))}
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          {TOOLS.map((tool) => {
-            const open = canAccessTool(plan, tool.id);
-            return <p key={tool.id} className={open ? "rounded-lg border border-[#22C55E]/30 px-3 py-2 text-xs text-[#22C55E]" : "rounded-lg border border-[#27344B] px-3 py-2 text-xs text-[#64748B]"}>{tool.label}: {open ? "open" : "needs " + NAMES[TOOL_REQUIRED_PLAN[tool.id]]}</p>;
-          })}
+        <div>
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#64748B]">Tool access</h3>
+          <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {TOOLS.map((tool) => {
+              const open = canAccessTool(plan, tool.id);
+              return (
+                <li key={tool.id} className={open ? "rounded-lg border border-[#22C55E]/30 px-3 py-2 text-sm text-[#22C55E]" : "rounded-lg border border-[#27344B] px-3 py-2 text-sm text-[#64748B]"}>
+                  {tool.label}: {open ? "open" : "requires " + NAMES[TOOL_REQUIRED_PLAN[tool.id]]}
+                </li>
+              );
+            })}
+          </ul>
         </div>
-      </div>
+      </section>
 
-      <div className="flex gap-2">
-        <button onClick={() => setAnnual(false)} className={!annual ? "rounded-full bg-[#00D4FF] px-4 py-2 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-4 py-2 text-xs font-semibold text-[#64748B]"}>Monthly</button>
-        <button onClick={() => setAnnual(true)} className={annual ? "rounded-full bg-[#00D4FF] px-4 py-2 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-4 py-2 text-xs font-semibold text-[#64748B]"}>Yearly</button>
-      </div>
-
-      {ORDER.map((id) => {
-        const cfg = PLAN_CONFIG[id];
-        const price = annual ? PRICES[id].year : PRICES[id].month;
-        const current = id === plan;
-        return (
-          <article key={id} className={current ? "rounded-2xl border border-[#00D4FF] bg-[#111A2E] p-5" : "rounded-2xl border border-[#27344B] bg-[#0B1020] p-5"}>
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-xl font-bold text-white">{NAMES[id]}{current ? " · current" : ""}</h3>
-                <p className="mt-1 text-sm text-[#C7D0E0]">{MEANT[id]}</p>
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-3">
+          <h2 className="text-lg font-semibold text-white">Change plan</h2>
+          <div className="flex gap-2">
+            <button onClick={() => setAnnual(false)} className={!annual ? "rounded-full bg-[#00D4FF] px-3 py-1.5 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-3 py-1.5 text-xs font-medium text-[#64748B]"}>Monthly</button>
+            <button onClick={() => setAnnual(true)} className={annual ? "rounded-full bg-[#00D4FF] px-3 py-1.5 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-3 py-1.5 text-xs font-medium text-[#64748B]"}>Yearly</button>
+          </div>
+        </div>
+        {ORDER.map((id) => {
+          const cfg = PLAN_CONFIG[id];
+          const price = annual ? PRICES[id].year : PRICES[id].month;
+          const current = id === plan;
+          const copy = DETAIL[id];
+          return (
+            <article key={id} className={current ? "rounded-2xl border border-[#00D4FF] bg-[#111A2E] p-5" : "rounded-2xl border border-[#27344B] bg-[#0B1020] p-5"}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-semibold tracking-tight text-white">{NAMES[id]}{current ? " · current" : ""}</h3>
+                  <p className="mt-1 text-sm leading-6 text-[#C7D0E0]">{copy.meant}</p>
+                </div>
+                <p className="text-xl font-semibold text-white">{price === 0 ? "$0" : "$" + price}<span className="text-xs font-normal text-[#64748B]">{price === 0 ? "" : annual ? "/yr" : "/mo"}</span></p>
               </div>
-              <p className="text-xl font-bold text-white">{price === 0 ? "$0" : "$" + price}<span className="text-xs font-normal text-[#64748B]">{price === 0 ? "" : annual ? "/yr" : "/mo"}</span></p>
-            </div>
-            <ul className="mt-4 space-y-1 text-sm text-[#C7D0E0]">
-              <li>Projects {cap(cfg.max_projects)} · Clients {cap(cfg.max_clients)} · Documents {cap(cfg.max_documents)}</li>
-              <li>Rich text {cfg.can_use_rich_text ? "on" : "off"} · Attachments {cfg.can_use_attachments ? storage(cfg.max_storage_bytes) : "off"}</li>
-              <li>Opens: {TOOLS.filter((tool) => canAccessTool(id, tool.id)).map((tool) => tool.label).join(", ")}</li>
-            </ul>
-            <Button onClick={() => checkout(id)} disabled={current || id === "free" || busy === id} className="mt-4 w-full bg-white text-[#0B1020] disabled:bg-[#27344B] disabled:text-[#64748B]">
-              {current ? "Current plan" : id === "free" ? "Included" : busy === id ? "Opening checkout..." : "Pay for " + NAMES[id]}
-            </Button>
-          </article>
-        );
-      })}
+              <p className="mt-3 text-sm text-[#C7D0E0]">Projects {cap(cfg.max_projects)} · Clients {cap(cfg.max_clients)} · Documents {cap(cfg.max_documents)} · Storage {cfg.can_use_attachments ? storage(cfg.max_storage_bytes) : "off"}</p>
+              <Button onClick={() => checkout(id)} disabled={current || id === "free" || busy === id} className="mt-4 w-full bg-white text-[#0B1020] disabled:bg-[#27344B] disabled:text-[#64748B]">
+                {current ? "Current plan" : id === "free" ? "Included with the account" : busy === id ? "Opening checkout..." : "Subscribe to " + NAMES[id]}
+              </Button>
+            </article>
+          );
+        })}
+      </section>
     </div>
   );
-}
+             }
