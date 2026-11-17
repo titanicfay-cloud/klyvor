@@ -21,8 +21,13 @@ const PRICES: Record<PlanId, { month: number; year: number }> = {
   business_plus: { month: 299, year: 2990 },
 };
 const NAMES: Record<PlanId, string> = {
-  free: "Free", productivity: "Productivity", professional: "Professional", business: "Business",
-  all_access: "All-Access", team: "Team", business_plus: "Business Plus",
+  free: "Free",
+  productivity: "Productivity",
+  professional: "Professional",
+  business: "Business",
+  all_access: "All-Access",
+  team: "Team",
+  business_plus: "Business Plus",
 };
 const MEANT: Record<PlanId, string> = {
   free: "Try the daily basics: tasks, notes, and price quotes.",
@@ -46,12 +51,15 @@ const TOOLS: { id: ToolId; label: string }[] = [
   { id: "expenses", label: "Expenses" },
 ];
 
-function cap(n: number) { return n >= 999999 ? "Unlimited" : String(n); }
+function cap(n: number) {
+  return n >= 999999 ? "Unlimited" : String(n);
+}
+
 function storage(bytes: number) {
   if (bytes <= 0) return "None";
   const gb = bytes / (1024 * 1024 * 1024);
-  if (gb >= 1) return `${gb} GB`;
-  return `${Math.round(bytes / (1024 * 1024))} MB`;
+  if (gb >= 1) return gb + " GB";
+  return Math.round(bytes / (1024 * 1024)) + " MB";
 }
 
 export default function BillingPage() {
@@ -85,7 +93,7 @@ export default function BillingPage() {
     const unlimited = max >= 999999;
     const full = !unlimited && used >= max;
     const width = unlimited ? 8 : Math.min(100, (used / Math.max(max, 1)) * 100);
-    return { label: `${used} / ${cap(max)}`, full, width };
+    return { label: used + " / " + cap(max), full, width };
   };
 
   const checkout = async (id: PlanId) => {
@@ -130,21 +138,23 @@ export default function BillingPage() {
         {rows.map((row) => (
           <div key={row.name}>
             <div className="mb-1 flex justify-between text-sm"><span className="text-white">{row.name}</span><span className={row.full ? "text-[#EF4444]" : "text-[#C7D0E0]"}>{row.label}{row.full ? " · full" : ""}</span></div>
-            <div className="h-2 rounded-full bg-[#0B1020]"><div className={`h-2 rounded-full \( {row.full ? "bg-[#EF4444]" : "bg-[#00D4FF]"}`} style={{ width: ` \){row.width}%` }} /></div>
+            <div className="h-2 rounded-full bg-[#0B1020]">
+              <div className={row.full ? "h-2 rounded-full bg-[#EF4444]" : "h-2 rounded-full bg-[#00D4FF]"} style={{ width: row.width + "%" }} />
+            </div>
             <p className="mt-1 text-xs text-[#64748B]">{row.note}</p>
           </div>
         ))}
         <div className="grid grid-cols-2 gap-2 pt-2">
           {TOOLS.map((tool) => {
             const open = canAccessTool(plan, tool.id);
-            return <p key={tool.id} className={`rounded-lg border px-3 py-2 text-xs ${open ? "border-[#22C55E]/30 text-[#22C55E]" : "border-[#27344B] text-[#64748B]"}`}>{tool.label}: {open ? "open" : `needs ${NAMES[TOOL_REQUIRED_PLAN[tool.id]]}`}</p>;
+            return <p key={tool.id} className={open ? "rounded-lg border border-[#22C55E]/30 px-3 py-2 text-xs text-[#22C55E]" : "rounded-lg border border-[#27344B] px-3 py-2 text-xs text-[#64748B]"}>{tool.label}: {open ? "open" : "needs " + NAMES[TOOL_REQUIRED_PLAN[tool.id]]}</p>;
           })}
         </div>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => setAnnual(false)} className={`rounded-full px-4 py-2 text-xs font-semibold ${!annual ? "bg-[#00D4FF] text-[#0B1020]" : "bg-[#111A2E] text-[#64748B]"}`}>Monthly</button>
-        <button onClick={() => setAnnual(true)} className={`rounded-full px-4 py-2 text-xs font-semibold ${annual ? "bg-[#00D4FF] text-[#0B1020]" : "bg-[#111A2E] text-[#64748B]"}`}>Yearly</button>
+        <button onClick={() => setAnnual(false)} className={!annual ? "rounded-full bg-[#00D4FF] px-4 py-2 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-4 py-2 text-xs font-semibold text-[#64748B]"}>Monthly</button>
+        <button onClick={() => setAnnual(true)} className={annual ? "rounded-full bg-[#00D4FF] px-4 py-2 text-xs font-semibold text-[#0B1020]" : "rounded-full bg-[#111A2E] px-4 py-2 text-xs font-semibold text-[#64748B]"}>Yearly</button>
       </div>
 
       {ORDER.map((id) => {
@@ -152,13 +162,13 @@ export default function BillingPage() {
         const price = annual ? PRICES[id].year : PRICES[id].month;
         const current = id === plan;
         return (
-          <article key={id} className={`rounded-2xl border p-5 ${current ? "border-[#00D4FF] bg-[#111A2E]" : "border-[#27344B] bg-[#0B1020]"}`}>
+          <article key={id} className={current ? "rounded-2xl border border-[#00D4FF] bg-[#111A2E] p-5" : "rounded-2xl border border-[#27344B] bg-[#0B1020] p-5"}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-xl font-bold text-white">{NAMES[id]}{current ? " · current" : ""}</h3>
                 <p className="mt-1 text-sm text-[#C7D0E0]">{MEANT[id]}</p>
               </div>
-              <p className="text-xl font-bold text-white">{price === 0 ? "$0" : `$${price}`}<span className="text-xs font-normal text-[#64748B]">{price === 0 ? "" : annual ? "/yr" : "/mo"}</span></p>
+              <p className="text-xl font-bold text-white">{price === 0 ? "$0" : "$" + price}<span className="text-xs font-normal text-[#64748B]">{price === 0 ? "" : annual ? "/yr" : "/mo"}</span></p>
             </div>
             <ul className="mt-4 space-y-1 text-sm text-[#C7D0E0]">
               <li>Projects {cap(cfg.max_projects)} · Clients {cap(cfg.max_clients)} · Documents {cap(cfg.max_documents)}</li>
@@ -166,7 +176,7 @@ export default function BillingPage() {
               <li>Opens: {TOOLS.filter((tool) => canAccessTool(id, tool.id)).map((tool) => tool.label).join(", ")}</li>
             </ul>
             <Button onClick={() => checkout(id)} disabled={current || id === "free" || busy === id} className="mt-4 w-full bg-white text-[#0B1020] disabled:bg-[#27344B] disabled:text-[#64748B]">
-              {current ? "Current plan" : id === "free" ? "Included" : busy === id ? "Opening checkout..." : `Pay for ${NAMES[id]}`}
+              {current ? "Current plan" : id === "free" ? "Included" : busy === id ? "Opening checkout..." : "Pay for " + NAMES[id]}
             </Button>
           </article>
         );
