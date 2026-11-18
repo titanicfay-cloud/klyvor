@@ -328,12 +328,18 @@ export default function SettingsPage() {
       {/* SETTINGS NAVIGATION AND CONTENT */}
       <div className="grid gap-6 lg:grid-cols-[245px_minmax(0,1fr)]">
 
-        <aside className="space-y-3">
+        <aside className="min-w-0 space-y-3">
           <p className="hidden px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#64748B] lg:block">
             Account control
           </p>
 
-          <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
+           <nav
+  className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto overscroll-x-contain touch-pan-x pb-3 lg:flex-col lg:overflow-visible lg:pb-0"
+  style={{
+    WebkitOverflowScrolling: "touch",
+    scrollbarWidth: "none",
+  }}
+>
             {TABS.map((item) => {
               const Icon = item.icon;
               const selected = tab === item.id;
