@@ -706,7 +706,7 @@ export default function SettingsPage() {
               <section className={`${panel} overflow-hidden`}>
                 <div className="border-b border-[#27344B] px-5 py-4 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <Download size={19} className="text-[#00D4FF]" />
+                    <ArrowDownToLine size={19} className="text-[#00D4FF]" />
                     <div>
                       <h3 className="text-sm font-semibold text-white">Your information</h3>
                       <p className="text-xs text-[#64748B]">Access a portable copy of your workspace records</p>
