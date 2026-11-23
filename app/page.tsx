@@ -2,6 +2,7 @@
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
 import TrustStrip from "@/components/landing/TrustStrip";
+import LandingNavStrip from "@/components/landing/LandingNavStrip";
 import PlatformOverview from "@/components/landing/PlatformOverview";
 import ProblemSection from "@/components/landing/ProblemSection";
 import HowItWorks from "@/components/landing/HowItWorks";
@@ -14,9 +15,11 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col overflow-hidden bg-[#0B1020]">
       <Navbar />
+
       <main className="flex-grow">
         <Hero />
         <TrustStrip />
+        <LandingNavStrip />
         <PlatformOverview />
         <ProblemSection />
         <HowItWorks />
@@ -24,6 +27,7 @@ export default function Home() {
         <BrandStatement />
         <FinalCTA />
       </main>
+
       <Footer />
     </div>
   );
