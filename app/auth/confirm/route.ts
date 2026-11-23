@@ -7,29 +7,42 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+  const code = searchParams.get("code");
   const requestedNext = searchParams.get("next") ?? "/dashboard";
 
-  if (!tokenHash || !type) {
-    return NextResponse.redirect(
-      new URL("/login?error=Invalid or expired link", request.url)
-    );
-  }
-
   const supabase = await createClient();
+  let isRecovery = type === "recovery";
 
-  const { error } = await supabase.auth.verifyOtp({
-    type,
-    token_hash: tokenHash,
-  });
+  // Support Supabase's default email template.
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
+    if (error) {
+      return NextResponse.redirect(
+        new URL("/login?error=Invalid or expired link", request.url)
+      );
+    }
+
+    isRecovery = requestedNext === "/reset-password";
+  } else if (tokenHash && type) {
+    // Also support token-hash email templates.
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash: tokenHash,
+    });
+
+    if (error) {
+      return NextResponse.redirect(
+        new URL("/login?error=Invalid or expired link", request.url)
+      );
+    }
+  } else {
     return NextResponse.redirect(
       new URL("/login?error=Invalid or expired link", request.url)
     );
   }
 
-  // Password recovery must always lead to the password reset page.
-  if (type === "recovery") {
+  if (isRecovery) {
     const response = NextResponse.redirect(
       new URL("/reset-password", request.url)
     );
@@ -45,7 +58,6 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  // Only allow redirects to this application's own origin.
   const redirectUrl = new URL(request.url);
   const candidateUrl = new URL(requestedNext, request.url);
 
@@ -54,4 +66,4 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(new URL("/dashboard", request.url));
-}
+      }
