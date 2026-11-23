@@ -1,48 +1,82 @@
+
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-card border-t border-border pt-16 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-12 mb-12">
-          <div className="col-span-1 sm:col-span-2 md:col-span-1">
-            <span className="text-white font-bold text-2xl tracking-widest block mb-2">KLYVOR</span>
-            <span className="text-klyvor-gradient font-medium text-sm block mb-4">Beyond What's Possible.</span>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">A connected professional platform for organising work, managing information and moving forward with clarity.</p>
+    <footer className="relative overflow-hidden border-t border-white/[0.07] bg-[#080E1C]">
+      <div className="mx-auto max-w-7xl px-5 pb-7 pt-12 sm:px-8 md:pt-14">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+          {/* Brand */}
+          <div className="max-w-sm">
+            <Link href="/" className="inline-flex items-center">
+              <Image
+                src="/logo.png"
+                alt="KLYVOR"
+                width={150}
+                height={42}
+                className="h-9 w-auto object-contain object-left"
+                priority={false}
+              />
+            </Link>
+
+            <p className="mt-3 text-sm font-medium text-[#00D4FF]">
+              Beyond What's Possible.
+            </p>
+
+            <p className="mt-3 max-w-xs text-sm leading-6 text-slate-400">
+              A connected professional platform for organising work,
+              managing information and moving forward with clarity.
+            </p>
           </div>
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Product</h3>
-            <ul className="space-y-3">
-              {/* FIXED: Pointed to actual routes */}
-              <li><Link href="/about" className="text-muted-foreground hover:text-primary text-sm transition-colors">Platform Overview</Link></li>
-              <li><Link href="/how-it-works" className="text-muted-foreground hover:text-primary text-sm transition-colors">How It Works</Link></li>
-              <li><Link href="/pricing" className="text-muted-foreground hover:text-primary text-sm transition-colors">Pricing & Plans</Link></li>
-              <li><Link href="/signup" className="text-muted-foreground hover:text-primary text-sm transition-colors">Create Account</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Company</h3>
-            <ul className="space-y-3">
-              <li><Link href="/about" className="text-muted-foreground hover:text-primary text-sm transition-colors">About KLYVOR</Link></li>
-              <li><Link href="/how-it-works" className="text-muted-foreground hover:text-primary text-sm transition-colors">The Workflow</Link></li>
-              <li><Link href="/help" className="text-muted-foreground hover:text-primary text-sm transition-colors">Contact Support</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-sm tracking-wider uppercase">Legal</h3>
-            <ul className="space-y-3">
-              <li><Link href="/privacy" className="text-muted-foreground hover:text-primary text-sm transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="text-muted-foreground hover:text-primary text-sm transition-colors">Terms of Service</Link></li>
-            </ul>
+
+          {/* Essential links */}
+          <div className="flex flex-wrap gap-x-16 gap-y-8">
+            <div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white">
+                Support
+              </h3>
+              <Link
+                href="/help"
+                className="text-sm text-slate-400 transition-colors hover:text-[#00D4FF]"
+              >
+                Help Centre
+              </Link>
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white">
+                Legal
+              </h3>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/privacy"
+                  className="text-sm text-slate-400 transition-colors hover:text-[#00D4FF]"
+                >
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/terms"
+                  className="text-sm text-slate-400 transition-colors hover:text-[#00D4FF]"
+                >
+                  Terms of Service
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-muted-foreground text-sm">© {currentYear} KLYVOR. All rights reserved.</p>
-          <div className="flex space-x-6">
-            <Link href="/login" className="text-muted-foreground hover:text-white text-sm transition-colors">Sign In</Link>
-          </div>
+
+        {/* Copyright */}
+        <div className="mt-10 flex flex-col gap-2 border-t border-white/[0.07] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-slate-500">
+            © {currentYear} KLYVOR. All rights reserved.
+          </p>
+
+          <p className="text-xs text-slate-500">
+            Built for the way you work.
+          </p>
         </div>
       </div>
     </footer>
