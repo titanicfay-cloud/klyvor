@@ -9,24 +9,32 @@ export default function Footer() {
     <footer className="relative overflow-hidden border-t border-white/[0.07] bg-[#080E1C]">
       <div className="mx-auto max-w-7xl px-5 pb-7 pt-12 sm:px-8 md:pt-14">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
-          {/* Brand */}
+          {/* Integrated KLYVOR identity */}
           <div className="max-w-sm">
-            <Link href="/" className="inline-flex items-center">
+            <Link
+              href="/"
+              aria-label="KLYVOR home"
+              className="group inline-flex items-center gap-3 outline-none focus-visible:ring-2 focus-visible:ring-[#00D4FF]"
+            >
               <Image
-                src="/logo.png"
-                alt="KLYVOR"
-                width={150}
-                height={42}
-                className="h-9 w-auto object-contain object-left"
-                priority={false}
+                src="/klyvor-symbol.png"
+                alt=""
+                width={100}
+                height={100}
+                className="h-14 w-14 object-contain drop-shadow-[0_0_12px_rgba(0,212,255,0.15)] transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-[0_0_18px_rgba(0,212,255,0.28)]"
               />
+
+              <span className="flex flex-col">
+                <span className="text-xl font-extrabold tracking-[0.18em] text-white">
+                  KLYVOR
+                </span>
+                <span className="mt-1 text-[9px] font-semibold tracking-[0.2em] text-slate-500">
+                  BEYOND WHAT'S POSSIBLE.
+                </span>
+              </span>
             </Link>
 
-            <p className="mt-3 text-sm font-medium text-[#00D4FF]">
-              Beyond What's Possible.
-            </p>
-
-            <p className="mt-3 max-w-xs text-sm leading-6 text-slate-400">
+            <p className="mt-5 max-w-xs text-sm leading-6 text-slate-400">
               A connected professional platform for organising work,
               managing information and moving forward with clarity.
             </p>
