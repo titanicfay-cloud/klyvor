@@ -23,7 +23,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         
         <div className="relative z-10">
           <Link href="/">
-            <Image src="/logo.png" alt="KLYVOR" width={260} height={80} className="object-contain w-auto h-16 md:h-20" />
+             <Image
+  src="/klyvor-symbol.png"
+  alt="KLYVOR"
+  width={96}
+  height={96}
+  className="h-20 w-20 object-contain"
+  priority
+    />
           </Link>
         </div>
 
@@ -46,7 +53,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Mobile Logo */}
         <div className="lg:hidden mb-12 flex justify-center">
           <Link href="/">
-             <Image src="/logo.png" alt="KLYVOR" width={200} height={60} className="object-contain w-auto h-12" />
+             <Image
+  src="/klyvor-symbol.png"
+  alt="KLYVOR"
+  width={72}
+  height={72}
+  className="h-16 w-16 object-contain"
+  priority
+     />
           </Link>
         </div>
         
