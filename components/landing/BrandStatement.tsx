@@ -29,7 +29,6 @@ const principles = [
 export default function BrandStatement() {
   return (
     <>
-      {/* KLYVOR philosophy */}
       <section className="relative isolate overflow-hidden border-y border-white/[0.06] bg-[#080E1C] px-4 py-24 sm:px-6 md:py-32 lg:px-8">
         <div
           aria-hidden="true"
@@ -41,7 +40,6 @@ export default function BrandStatement() {
         />
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
-          {/* Brand message */}
           <div>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#00D4FF]/20 bg-[#00D4FF]/[0.06] px-4 py-2">
               <Orbit size={14} className="text-[#00D4FF]" />
@@ -81,29 +79,13 @@ export default function BrandStatement() {
             </div>
           </div>
 
-          {/* Orbital brand visual */}
           <div className="relative mx-auto flex aspect-square w-full max-w-[440px] items-center justify-center">
-            <div
-              aria-hidden="true"
-              className="absolute inset-[8%] rounded-full border border-[#00D4FF]/10"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-[19%] rounded-full border border-[#7C5CFC]/20"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-[30%] rounded-full border border-white/[0.07]"
-            />
+            <div aria-hidden="true" className="absolute inset-[8%] rounded-full border border-[#00D4FF]/10" />
+            <div aria-hidden="true" className="absolute inset-[19%] rounded-full border border-[#7C5CFC]/20" />
+            <div aria-hidden="true" className="absolute inset-[30%] rounded-full border border-white/[0.07]" />
 
-            <div
-              aria-hidden="true"
-              className="absolute h-[72%] w-[72%] rotate-[-28deg] rounded-[50%] border border-[#00D4FF]/40 shadow-[0_0_35px_rgba(0,212,255,0.08)]"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute h-[72%] w-[72%] rotate-[42deg] rounded-[50%] border border-[#7C5CFC]/40 shadow-[0_0_35px_rgba(124,92,252,0.08)]"
-            />
+            <div aria-hidden="true" className="absolute h-[72%] w-[72%] rotate-[-28deg] rounded-[50%] border border-[#00D4FF]/40 shadow-[0_0_35px_rgba(0,212,255,0.08)]" />
+            <div aria-hidden="true" className="absolute h-[72%] w-[72%] rotate-[42deg] rounded-[50%] border border-[#7C5CFC]/40 shadow-[0_0_35px_rgba(124,92,252,0.08)]" />
 
             <div className="absolute left-[15%] top-[24%] h-3 w-3 rounded-full bg-[#00D4FF] shadow-[0_0_22px_#00D4FF]" />
             <div className="absolute bottom-[19%] right-[19%] h-3 w-3 rounded-full bg-[#A78BFA] shadow-[0_0_22px_#7C5CFC]" />
@@ -146,7 +128,6 @@ export default function BrandStatement() {
         </div>
       </section>
 
-      {/* Pricing and access introduction */}
       <section
         id="pricing"
         className="relative overflow-hidden border-b border-white/[0.06] bg-[#0B1222] px-4 py-24 sm:px-6 md:py-28 lg:px-8"
@@ -215,7 +196,7 @@ export default function BrandStatement() {
 
           <div className="mt-10 text-center">
             <Link
-              href="#pricing"
+              href="/pricing"
               className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#00BBD8] to-[#7256E8] px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_30px_rgba(0,212,255,0.13)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_35px_rgba(0,212,255,0.22)]"
             >
               Explore Plans
@@ -229,4 +210,4 @@ export default function BrandStatement() {
       </section>
     </>
   );
-          }
+}
