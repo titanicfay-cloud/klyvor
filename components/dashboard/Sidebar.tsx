@@ -112,17 +112,17 @@ export default function Sidebar({
       )}
     >
       <div className="h-20 shrink-0 flex items-center px-6 border-b border-[#27344B]">
-        <Link href="/dashboard" onClick={onNavigate}>
-          <Image
-            src="/logo.png"
-            alt="KLYVOR"
-            width={160}
-            height={50}
-            className="object-contain w-auto h-10"
-            priority
-          />
-        </Link>
-      </div>
+  <Link href="/dashboard" onClick={onNavigate}>
+    <Image
+      src="/klyvor-symbol.png"
+      alt="KLYVOR"
+      width={64}
+      height={64}
+      className="h-12 w-12 object-contain"
+      priority
+         />
+         </Link>
+       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto py-5 px-3 space-y-1">
         {navGroups.map((group) => {
