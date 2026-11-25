@@ -28,7 +28,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* MOBILE TOP BAR */}
       <div className="lg:hidden h-16 border-b border-[#27344B] bg-[#0B1020] flex items-center justify-between px-4 sticky top-0 z-50">
         <div className="flex items-center gap-2">
-          <Image src="/logo.png" alt="KLYVOR" width={100} height={30} className="object-contain w-auto h-6" />
+          <Image
+  src="/klyvor-symbol.png"
+  alt="KLYVOR"
+  width={48}
+  height={48}
+  className="h-10 w-10 object-contain"
+  priority
+    />
           <span className={`text-[10px] font-bold text-white px-2 py-0.5 rounded ${roleName === 'OWNER' ? 'bg-[#7C5CFC]' : roleName === 'ADMIN' ? 'bg-[#EF4444]' : 'bg-[#F59E0B]'}`}>{roleName}</span>
         </div>
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
