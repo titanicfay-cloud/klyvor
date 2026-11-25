@@ -7,12 +7,19 @@ export default function AdminSidebar({ roleName, onNavigate }: { roleName: strin
   return (
     <div className="flex flex-col h-full w-full bg-[#0B1020]">
       <div className="h-20 shrink-0 flex items-center px-6 border-b border-[#27344B]">
-        <Link href="/admin" onClick={onNavigate} className="flex items-center gap-2">
-          <Image src="/logo.png" alt="KLYVOR" width={140} height={40} className="object-contain w-auto h-8" />
-          <span className={`text-[10px] font-bold text-white px-2 py-0.5 rounded ${roleName === 'OWNER' ? 'bg-[#7C5CFC]' : roleName === 'ADMIN' ? 'bg-[#EF4444]' : 'bg-[#F59E0B]'}`}>
-            {roleName}
-          </span>
-        </Link>
+        <Link href="/admin" onClick={onNavigate} className="flex items-center gap-3">
+  <Image
+    src="/klyvor-symbol.png"
+    alt="KLYVOR"
+    width={48}
+    height={48}
+    className="h-10 w-10 object-contain"
+    priority
+  />
+  <span className={`text-[10px] font-bold text-white px-2 py-0.5 rounded ${roleName === 'OWNER' ? 'bg-[#7C5CFC]' : roleName === 'ADMIN' ? 'bg-[#EF4444]' : 'bg-[#F59E0B]'}`}>
+    {roleName}
+      </span>
+    </Link>
       </div>
       <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
         <Link href="/admin" onClick={onNavigate} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#C7D0E0] hover:bg-[#111A2E] hover:text-white transition-colors">
