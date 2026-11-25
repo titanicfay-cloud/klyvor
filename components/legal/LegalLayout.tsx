@@ -17,7 +17,14 @@ export default function LegalLayout({
       <header className="border-b border-[#27344B] bg-[#0B1020]/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/logo.png" alt="KLYVOR" width={140} height={40} className="object-contain w-auto h-8" />
+            <Image
+  src="/klyvor-symbol.png"
+  alt="KLYVOR"
+  width={48}
+  height={48}
+  className="h-10 w-10 object-contain"
+  priority
+    />
           </Link>
           <Link href="/" className="text-sm font-medium text-primary hover:text-white flex items-center gap-2 transition-colors">
             <ArrowLeft size={16} /> Back to Home
