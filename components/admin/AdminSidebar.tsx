@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Bell,
   LayoutDashboard,
+  UserCog,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -35,9 +36,21 @@ export default function AdminSidebar({
 
   const navigation = isOwner
     ? [
-        { label: "Owner Command Centre", href: "/admin", icon: Shield },
-        { label: "Notifications", href: "/admin/notifications", icon: Bell },
-        { label: "Support Oversight", href: "/admin/support", icon: LifeBuoy },
+        {
+          label: "Owner Command Centre",
+          href: "/admin",
+          icon: Shield,
+        },
+        {
+          label: "Notifications",
+          href: "/admin/notifications",
+          icon: Bell,
+        },
+        {
+          label: "Support Oversight",
+          href: "/admin/support",
+          icon: LifeBuoy,
+        },
       ]
     : isAdmin
       ? [
@@ -123,6 +136,17 @@ export default function AdminSidebar({
             <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#64748B]">
               Platform Management
             </p>
+
+            {isOwner && (
+              <Link
+                href="/admin/staff"
+                onClick={onNavigate}
+                className="mb-1 flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-[#C7D0E0] transition-colors hover:bg-[#111A2E] hover:text-white"
+              >
+                <UserCog size={18} />
+                Staff & Permissions
+              </Link>
+            )}
 
             <Link
               href="/admin/users"
