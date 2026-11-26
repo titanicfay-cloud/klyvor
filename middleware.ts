@@ -43,6 +43,12 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Track authenticated application activity.
+  // The database function throttles updates to once every 5 minutes.
+  if (user) {
+    await supabase.rpc("update_my_last_active");
+  }
+
   if (!user && pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -68,6 +74,7 @@ export async function middleware(request: NextRequest) {
             new URL("/dashboard/settings/billing", request.url)
           );
         }
+
         break;
       }
     }
