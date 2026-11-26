@@ -14,11 +14,13 @@ import {
 
 interface AdminSidebarProps {
   roleName: string;
+  canViewUsers?: boolean;
   onNavigate?: () => void;
 }
 
 export default function AdminSidebar({
   roleName,
+  canViewUsers = false,
   onNavigate,
 }: AdminSidebarProps) {
   const isOwner = roleName === "OWNER";
@@ -33,21 +35,9 @@ export default function AdminSidebar({
 
   const navigation = isOwner
     ? [
-        {
-          label: "Owner Command Centre",
-          href: "/admin",
-          icon: Shield,
-        },
-        {
-          label: "Notifications",
-          href: "/admin/notifications",
-          icon: Bell,
-        },
-        {
-          label: "Support Oversight",
-          href: "/admin/support",
-          icon: LifeBuoy,
-        },
+        { label: "Owner Command Centre", href: "/admin", icon: Shield },
+        { label: "Notifications", href: "/admin/notifications", icon: Bell },
+        { label: "Support Oversight", href: "/admin/support", icon: LifeBuoy },
       ]
     : isAdmin
       ? [
@@ -128,19 +118,20 @@ export default function AdminSidebar({
           );
         })}
 
-        {isOwner && (
+        {(isOwner || (isAdmin && canViewUsers)) && (
           <div className="mt-8 border-t border-[#27344B] pt-5">
             <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#64748B]">
               Platform Management
             </p>
 
-            <div className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-[#64748B]">
+            <Link
+              href="/admin/users"
+              onClick={onNavigate}
+              className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-[#C7D0E0] transition-colors hover:bg-[#111A2E] hover:text-white"
+            >
               <Users size={18} />
-              Staff Management
-              <span className="ml-auto text-[9px] uppercase tracking-wider">
-                Coming soon
-              </span>
-            </div>
+              User Management
+            </Link>
           </div>
         )}
       </div>
@@ -157,4 +148,4 @@ export default function AdminSidebar({
       </div>
     </div>
   );
-              }
+}
