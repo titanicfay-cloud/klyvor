@@ -1,3 +1,4 @@
+
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { canAccessTool, PlanId, ToolId } from "@/lib/plans";
@@ -20,9 +21,13 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return request.cookies.getAll(); },
+        getAll() {
+          return request.cookies.getAll();
+        },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -32,28 +37,36 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const pathname = request.nextUrl.pathname;
 
   if (!user && pathname.startsWith("/dashboard")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   if (user && pathname.startsWith("/dashboard")) {
     for (const route of ROUTE_TOOLS) {
-      if (pathname === route.prefix || pathname.startsWith(route.prefix + "/")) {
+      if (
+        pathname === route.prefix ||
+        pathname.startsWith(route.prefix + "/")
+      ) {
         const { data: sub } = await supabase
           .from("user_subscriptions")
           .select("plan_id, status")
           .eq("user_id", user.id)
           .single();
-        const planId = ((sub?.status === "active" ? sub.plan_id : "free") || "free") as PlanId;
+
+        const planId = (
+          sub?.status === "active" ? sub.plan_id : "free"
+        ) as PlanId;
+
         if (!canAccessTool(planId, route.tool)) {
-          const url = request.nextUrl.clone();
-          url.pathname = "/dashboard/settings/billing";
-          return NextResponse.redirect(url);
+          return NextResponse.redirect(
+            new URL("/dashboard/settings/billing", request.url)
+          );
         }
         break;
       }
@@ -64,14 +77,48 @@ export async function middleware(request: NextRequest) {
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
+
     const { data: roleData } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .single();
-    if (!roleData || !["owner", "admin", "support"].includes(roleData.role)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+
+    const role = roleData?.role;
+
+    if (role === "owner") {
+      return supabaseResponse;
     }
+
+    if (role === "admin") {
+      if (
+        pathname === "/admin/admin-workspace" ||
+        pathname.startsWith("/admin/admin-workspace/")
+      ) {
+        return supabaseResponse;
+      }
+
+      return NextResponse.redirect(
+        new URL("/admin/admin-workspace", request.url)
+      );
+    }
+
+    if (role === "support") {
+      if (
+        pathname === "/admin/support-workspace" ||
+        pathname.startsWith("/admin/support-workspace/") ||
+        pathname === "/admin/support" ||
+        pathname.startsWith("/admin/support/")
+      ) {
+        return supabaseResponse;
+      }
+
+      return NextResponse.redirect(
+        new URL("/admin/support-workspace", request.url)
+      );
+    }
+
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return supabaseResponse;
