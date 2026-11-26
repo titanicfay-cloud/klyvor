@@ -43,8 +43,6 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
-  // Track authenticated application activity.
-  // The database function throttles updates to once every 5 minutes.
   if (user) {
     await supabase.rpc("update_my_last_active");
   }
@@ -98,11 +96,27 @@ export async function middleware(request: NextRequest) {
     }
 
     if (role === "admin") {
-      if (
+      const isAdminWorkspace =
         pathname === "/admin/admin-workspace" ||
-        pathname.startsWith("/admin/admin-workspace/")
-      ) {
+        pathname.startsWith("/admin/admin-workspace/");
+
+      const isUserManagement =
+        pathname === "/admin/users" ||
+        pathname.startsWith("/admin/users/");
+
+      if (isAdminWorkspace) {
         return supabaseResponse;
+      }
+
+      if (isUserManagement) {
+        const { data: allowed } = await supabase.rpc(
+          "has_staff_permission",
+          { p_permission_key: "users.view" }
+        );
+
+        if (allowed === true) {
+          return supabaseResponse;
+        }
       }
 
       return NextResponse.redirect(
