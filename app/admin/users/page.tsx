@@ -1,4 +1,3 @@
-
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -211,7 +210,7 @@ export default async function UserManagementPage({
 
                         {account.email ? (
                           <a
-                            href={\`mailto:\${account.email}\`}
+                            href={`mailto:${account.email}`}
                             className="mt-1 block text-xs text-[#00D4FF] hover:underline"
                           >
                             {account.email}
@@ -225,7 +224,7 @@ export default async function UserManagementPage({
 
                       <td className="px-5 py-4">
                         <Link
-                          href={\`/admin/users/\${account.user_id}\`}
+                          href={`/admin/users/${account.user_id}`}
                           className="inline-flex items-center gap-1 font-mono text-xs text-[#00D4FF] hover:underline"
                         >
                           {account.user_id.slice(0, 8)}…
@@ -241,7 +240,7 @@ export default async function UserManagementPage({
 
                       <td className="px-5 py-4">
                         <span
-                          className={\`rounded-md border px-2 py-1 text-xs font-medium capitalize \${statusStyle(account.account_status)}\`}
+                          className={`rounded-md border px-2 py-1 text-xs font-medium capitalize ${statusStyle(account.account_status)}`}
                         >
                           {account.account_status}
                         </span>
